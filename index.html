@@ -121,43 +121,6 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 .shape-btn.active{border-color:#1677ff;background:rgba(22,119,255,.15);
   box-shadow:0 0 0 2px rgba(22,119,255,.2)}
 
-/* ── TANGRAM PANEL — always visible, permanent sidebar ──────────── */
-#tgm-panel{
-  flex-shrink:0;width:0;overflow:hidden;
-  background:#0d1117;
-  border-right:0px solid #ff4d4f30;
-  display:flex;flex-direction:column;align-items:center;
-  gap:4px;padding:0;scrollbar-width:none;
-  transition:width .2s,padding .2s,border-right-width .2s;
-}
-#tgm-panel::-webkit-scrollbar{display:none}
-.tgm-label{
-  font-size:9px;font-weight:700;color:#ff4d4f;
-  text-transform:uppercase;letter-spacing:.08em;
-  text-align:center;flex-shrink:0;white-space:nowrap;
-}
-.tgm-sep{width:44px;height:1px;background:#ff4d4f30;flex-shrink:0;margin:2px 0}
-/* Piece buttons: mesma estrutura dos shape-btn mas vermelhos */
-.tgm-btn{
-  width:90px;height:75px;border-radius:var(--ant-border-radius);
-  background:rgba(255,77,79,.08);
-  border:1px solid rgba(255,77,79,.25);
-  display:flex;align-items:center;justify-content:center;
-  transition:all var(--ant-motion-duration-mid);flex-shrink:0;
-  cursor:pointer;
-}
-.tgm-btn:hover{border-color:#ff4d4f;background:rgba(255,77,79,.18)}
-/* Botão gato — destaque */
-.tgm-cat{
-  width:60px;border-radius:var(--ant-border-radius);
-  background:rgba(255,77,79,.12);border:1px solid #ff4d4f;
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;padding:5px 3px;
-  transition:all var(--ant-motion-duration-mid);flex-shrink:0;cursor:pointer;
-}
-.tgm-cat:hover{background:rgba(255,77,79,.25)}
-.tgm-cat span{font-size:9px;font-weight:700;color:#ff4d4f;white-space:nowrap}
-
 /* ── STAGE ──────────────────────────────────────────────────────── */
 #stage{flex:1;position:relative;background:#0a0c14;overflow:hidden;min-width:0}
 #canvas2d{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
@@ -445,90 +408,10 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 
 
     <div class="lsb-sep"></div>
-    <div class="lsb-label">TANGRAM</div>
-    <button class="shape-btn" id="btn-tgm-toggle" onclick="toggleTgm()" title="Peças Tangram">
-      <svg width="34" height="34" viewBox="0 0 34 34">
-        <polygon points="2,2 17,2 2,17"   fill="rgba(255,77,79,.85)"/>
-        <polygon points="32,32 17,32 32,17" fill="rgba(255,77,79,.85)"/>
-        <polygon points="17,2 32,2 32,17"  fill="rgba(255,77,79,.6)"/>
-        <polygon points="2,17 9,24 2,32"   fill="rgba(255,77,79,.6)"/>
-        <polygon points="17,17 24,17 17,24" fill="rgba(255,77,79,.6)"/>
-        <rect x="9" y="24" width="8" height="8" fill="rgba(255,77,79,.6)"/>
-        <polygon points="9,24 17,17 24,17 17,24" fill="rgba(255,77,79,.4)"/>
-      </svg>
-    </button>
+    
   </div>
 
-  <!-- TANGRAM PANEL — abre/fecha ao clicar no botão acima -->
-  <div id="tgm-panel">
-    <div class="tgm-label">TANGRAM</div>
-    <div style="font-size:8px;color:#ff4d4f60;text-align:center;line-height:1.2;padding:0 2px">7 peças</div>
-
-    <!-- Tri. Grande A: rectângulo, ângulo recto em baixo-esquerda -->
-    <button class="tgm-btn" data-tangram="tg-L1" title="Triângulo grande">
-      <svg width="44" height="44" viewBox="0 0 44 44">
-        <polygon points="2,42 42,42 2,2" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <!-- Tri. Grande B: espelho, ângulo recto em baixo-direita -->
-    <button class="tgm-btn" data-tangram="tg-L2" title="Triângulo grande">
-      <svg width="44" height="44" viewBox="0 0 44 44">
-        <polygon points="2,42 42,42 42,2" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <!-- Tri. Médio: rectângulo menor, ângulo recto em baixo-esquerda -->
-    <button class="tgm-btn" data-tangram="tg-M" title="Triângulo médio">
-      <svg width="38" height="38" viewBox="0 0 38 38">
-        <polygon points="2,36 36,36 2,2" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <!-- Tri. Pequeno A: rectângulo pequeno, ângulo recto em baixo-esquerda -->
-    <button class="tgm-btn" data-tangram="tg-S1" title="Triângulo pequeno">
-      <svg width="32" height="32" viewBox="0 0 32 32">
-        <polygon points="2,30 30,30 2,2" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <!-- Tri. Pequeno B: espelho, ângulo recto em baixo-direita -->
-    <button class="tgm-btn" data-tangram="tg-S2" title="Triângulo pequeno">
-      <svg width="32" height="32" viewBox="0 0 32 32">
-        <polygon points="2,30 30,30 30,2" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <!-- Quadrado: mostrado na horizontal (não losango) -->
-    <button class="tgm-btn" data-tangram="tg-SQ" title="Quadrado">
-      <svg width="36" height="36" viewBox="0 0 36 36">
-        <rect x="3" y="3" width="30" height="30" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <!-- Paralelogramo: inclinado à direita -->
-    <button class="tgm-btn" data-tangram="tg-P" title="Paralelogramo">
-      <svg width="52" height="30" viewBox="0 0 52 30">
-        <polygon points="0,28 14,2 50,2 36,28" fill="#ff4d4f"/>
-      </svg>
-    </button>
-
-    <div class="tgm-sep"></div>
-
-    <!-- Botão Gato -->
-    <button class="tgm-cat" onclick="placeTangramCat()" title="Gato tangram">
-      <svg width="52" height="56" viewBox="0 0 90 100">
-        <polygon points="8,88 44,52 8,52" fill="#FF6B35"/>
-        <polygon points="8,88 44,88 44,52" fill="#4ecb71"/>
-        <polygon points="8,52 44,52 26,32" fill="#4D96FF"/>
-        <polygon points="26,12 44,32 26,52 8,32" fill="#FFD93D"/>
-        <polygon points="8,32 0,12 16,24" fill="#FF6B35"/>
-        <polygon points="44,32 54,12 38,24" fill="#ff4d4f"/>
-        <polygon points="44,88 58,72 72,88 58,104" fill="#a259ff"/>
-      </svg>
-      <span>🐱 GATO</span>
-    </button>
-  </div>
+ 
 
   <!-- STAGE — canvas de trabalho -->
   <div id="stage">
@@ -1612,7 +1495,7 @@ function onUp(e){
   // finish freehand
   if(fhDrawing&&fhCurrent.length>4){
     pushUndo();
-    const simplified=rdp(fhCurrent,3);
+    const simplified=rdp(smooth(fhCurrent,3),1.2);
     const cd=COLOR_DEFS.find(c=>c.hex===activeColor)||COLOR_DEFS[0];
     shapes.push({
       id:nextId++,type:'freehand',
@@ -1633,7 +1516,17 @@ function onUp(e){
   redraw();
 }
 
-// ── RDP ─────────────────────────────────────────
+// ── Smooth + RDP ─────────────────────────────────
+// smooth: média móvel com janela w (preserva primeiro e último ponto)
+function smooth(pts, w){
+  if(pts.length<=2) return pts;
+  return pts.map((p,i)=>{
+    const lo=Math.max(0,i-w), hi=Math.min(pts.length-1,i+w);
+    let sx=0,sy=0,n=0;
+    for(let j=lo;j<=hi;j++){sx+=pts[j].x;sy+=pts[j].y;n++;}
+    return{x:sx/n,y:sy/n};
+  });
+}
 function perp(pt,a,b){
   const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;
   if(!l)return Math.hypot(pt.x-a.x,pt.y-a.y);
@@ -2093,48 +1986,6 @@ document.querySelectorAll('[data-tangram]').forEach(btn => {
   };
 });
 
-function placeTangramCat() {
-  if (mode !== '2d') return;
-  resizeCanvas();
-  pushUndo();
-
-  // Coordenadas exactas derivadas do JSON do gato construído manualmente.
-  // Centrar no canvas: bbox do gato ≈ x:[204,447], y:[28,454] → centro≈(325,241)
-  // Offset: (cx-325, cy-241) onde cx,cy = centro do canvas em world coords
-  const wcx = (canvas.width  - vpPanX * 0) / vpZoom / 2 - vpPanX / vpZoom;
-  const wcy = (canvas.height - vpPanY * 0) / vpZoom / 2 - vpPanY / vpZoom;
-  // mais simples: centro do canvas em world coords
-  const cx = (canvas.width/2  - vpPanX) / vpZoom;
-  const cy = (canvas.height/2 - vpPanY) / vpZoom;
-  const dx = cx - 325.7, dy = cy - 241.2;
-
-  const pieces = [
-    // corpo esq (tri grande)
-    { type:'freehand', fhPoints:[{x:446.7+dx,y:332.2+dy},{x:327.2+dx,y:212.7+dy},{x:327.2+dx,y:451.7+dy}] },
-    // perna dir (tri grande)
-    { type:'freehand', fhPoints:[{x:204.2+dx,y:332.3+dy},{x:323.7+dx,y:451.8+dy},{x:323.7+dx,y:212.8+dy}] },
-    // cabeça (quadrado rotado)
-    { type:'rect',     x:326.7+dx, y:151.0+dy, w:84.5, h:84.5, rot:5.4978 },
-    // barriga (tri médio)
-    { type:'freehand', fhPoints:[{x:204.0+dx,y:453.5+dy},{x:323.5+dx,y:453.5+dy},{x:204.0+dx,y:334.0+dy}] },
-    // orelha dir (tri pequeno)
-    { type:'freehand', fhPoints:[{x:389.0+dx,y:28.1+dy},{x:329.3+dx,y:87.8+dy},{x:389.0+dx,y:147.6+dy}] },
-    // orelha esq (tri pequeno)
-    { type:'freehand', fhPoints:[{x:265.0+dx,y:147.9+dy},{x:324.7+dx,y:88.1+dy},{x:265.0+dx,y:28.4+dy}] },
-    // rabo (paralelogramo)
-    { type:'para',     x:85.1+dx,  y:394.8+dy, w:169,  h:84.5, rot:0.7854 },
-  ];
-
-  const newIds=[];
-  pieces.forEach(p=>{
-    const s={id:nextId++, x:p.x||0, y:p.y||0, w:p.w||0, h:p.h||0,
-             rot:p.rot||0, color:TGM_COLOR, zMm:TGM_Z,
-             type:p.type, fhPoints:p.fhPoints||null};
-    shapes.push(s); newIds.push(s.id);
-  });
-  selectedIds=new Set(newIds);
-  redraw(); updateAchs(); unlockAch('shapes5');
-}
 
 
 // ── Viewport bar buttons (após DOM ready) ────────────────
@@ -2216,19 +2067,6 @@ function launchConfetti(){
   tick();
 }
 
-// ── Tangram panel toggle ─────────────────
-let tgmOpen = true;
-function toggleTgm(){
-  tgmOpen = !tgmOpen;
-  const p = document.getElementById('tgm-panel');
-  const b = document.getElementById('btn-tgm-toggle');
-  p.style.width    = tgmOpen ? '74px' : '0';
-  p.style.padding  = tgmOpen ? '8px 5px' : '0';
-  p.style.overflow = tgmOpen ? 'auto' : 'hidden';
-  p.style.borderRightWidth = tgmOpen ? '1px' : '0';
-  if(b) b.classList.toggle('active', tgmOpen);
-  setTimeout(resizeCanvas, 220);
-}
 
 // ── Init ─────────────────────────────────
 updateHistoryBtns();
