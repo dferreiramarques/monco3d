@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Monco 3D</title>
+<style>
+/* ── Ant Design token palette (dark theme adapted) ──────────────── */
+:root {
+  /* Seed tokens */
+  --ant-color-primary:        #1677ff;
+  --ant-color-success:        #52c41a;
+  --ant-color-warning:        #faad14;
+  --ant-color-error:          #ff4d4f;
+  --ant-color-info:           #1677ff;
+  /* Neutral */
+  --ant-color-bg-base:        #141414;
+  --ant-color-bg-container:   #1f1f1f;
+  --ant-color-bg-elevated:    #2a2a2a;
+  --ant-color-bg-spotlight:   #383838;
+  --ant-color-border:         #303030;
+  --ant-color-border-secondary: #2a2a2a;
+  --ant-color-text:           rgba(255,255,255,.88);
+  --ant-color-text-secondary: rgba(255,255,255,.65);
+  --ant-color-text-tertiary:  rgba(255,255,255,.45);
+  --ant-color-text-quaternary:rgba(255,255,255,.25);
+  --ant-color-fill:           rgba(255,255,255,.18);
+  --ant-color-fill-secondary: rgba(255,255,255,.12);
+  --ant-color-fill-tertiary:  rgba(255,255,255,.08);
+  /* Border radius */
+  --ant-border-radius:        6px;
+  --ant-border-radius-lg:     8px;
+  --ant-border-radius-sm:     4px;
+  /* Font */
+  --ant-font-family:          -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --ant-font-size:            14px;
+  --ant-font-size-sm:         12px;
+  --ant-font-size-lg:         16px;
+  /* Motion */
+  --ant-motion-duration-fast: .1s;
+  --ant-motion-duration-mid:  .2s;
+  /* Layout dims */
+  --hdr:  90px;
+  --bot:  100px;
+  --lsb:  104px;
+  --rsb: 160px;
+  --tgm:   0px; /* controlled by JS */
+}
+
+/* ── Reset ─────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;
+  background:var(--ant-color-bg-base);
+  font-family:var(--ant-font-family);
+  font-size:var(--ant-font-size);
+  color:var(--ant-color-text)}
+button{cursor:pointer;border:none;font-family:inherit;background:none}
+
+/* ── APP SHELL — full-page flex column ──────────────────────────── */
+#app{display:flex;flex-direction:column;width:100vw;height:100dvh;overflow:hidden}
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+#hdr{
+  flex-shrink:0;height:var(--hdr);
+  background:var(--ant-color-bg-container);
+  border-bottom:1px solid var(--ant-color-border);
+  display:flex;align-items:center;gap:8px;padding:0 16px;z-index:100;
+}
+#logo{font-size:40px;font-weight:700;color:#1677ff;letter-spacing:-.5px;flex-shrink:0}
+#logo span{color:#faad14}
+.hdr-btn{
+  background:transparent;color:var(--ant-color-text-secondary);
+  border:1px solid transparent;border-radius:var(--ant-border-radius);
+  padding:10px 24px;font-size:26px;font-weight:600;
+  transition:all var(--ant-motion-duration-mid);flex-shrink:0;
+}
+.hdr-btn:hover{border-color:var(--ant-color-border);color:var(--ant-color-text)}
+.hdr-btn.active{background:#1677ff20;color:#1677ff;border-color:#1677ff}
+.hdr-btn:disabled{opacity:.35;cursor:default}
+#score-badge{
+  margin-left:auto;
+  background:var(--ant-color-fill-secondary);
+  border:1px solid var(--ant-color-warning);
+  border-radius:100px;padding:3px 14px;
+  display:flex;align-items:center;gap:5px;
+  font-size:20px;font-weight:700;color:var(--ant-color-warning);flex-shrink:0;
+}
+#cert-btn{
+  background:#1677ff;color:#fff;
+  border-radius:var(--ant-border-radius);
+  padding:10px 22px;font-size:20px;font-weight:600;
+  flex-shrink:0;transition:opacity var(--ant-motion-duration-fast);
+}
+#cert-btn:hover{opacity:.85}
+
+/* ── BODY ROW — flex row, fills between hdr and bot ────────────── */
+#body-row{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ── LEFT SIDEBAR ───────────────────────────────────────────────── */
+#lsb{
+  flex-shrink:0;width:var(--lsb);
+  background:var(--ant-color-bg-container);
+  border-right:1px solid var(--ant-color-border);
+  display:flex;flex-direction:column;align-items:center;
+  gap:4px;padding:8px 5px;overflow-y:auto;scrollbar-width:none;
+}
+#lsb::-webkit-scrollbar{display:none}
+.lsb-label{
+  font-size:9px;font-weight:700;color:var(--ant-color-text-tertiary);
+  text-transform:uppercase;letter-spacing:.08em;text-align:center;flex-shrink:0;
+}
+.lsb-sep{width:74px;height:1px;background:var(--ant-color-border);flex-shrink:0;margin:3px 0}
+.shape-btn{
+  width:90px;height:75px;border-radius:var(--ant-border-radius);
+  background:var(--ant-color-fill-tertiary);
+  border:1px solid var(--ant-color-border);
+  display:flex;align-items:center;justify-content:center;
+  transition:all var(--ant-motion-duration-mid);flex-shrink:0;
+}
+.shape-btn:hover{border-color:#1677ff;background:rgba(22,119,255,.08)}
+.shape-btn.active{border-color:#1677ff;background:rgba(22,119,255,.15);
+  box-shadow:0 0 0 2px rgba(22,119,255,.2)}
+
+/* ── TANGRAM PANEL — always visible, permanent sidebar ──────────── */
+#tgm-panel{
+  flex-shrink:0;width:0;overflow:hidden;
+  background:#0d1117;
+  border-right:0px solid #ff4d4f30;
+  display:flex;flex-direction:column;align-items:center;
+  gap:4px;padding:0;scrollbar-width:none;
+  transition:width .2s,padding .2s,border-right-width .2s;
+}
+#tgm-panel::-webkit-scrollbar{display:none}
+.tgm-label{
+  font-size:9px;font-weight:700;color:#ff4d4f;
+  text-transform:uppercase;letter-spacing:.08em;
+  text-align:center;flex-shrink:0;white-space:nowrap;
+}
+.tgm-sep{width:44px;height:1px;background:#ff4d4f30;flex-shrink:0;margin:2px 0}
+/* Piece buttons: mesma estrutura dos shape-btn mas vermelhos */
+.tgm-btn{
+  width:90px;height:75px;border-radius:var(--ant-border-radius);
+  background:rgba(255,77,79,.08);
+  border:1px solid rgba(255,77,79,.25);
+  display:flex;align-items:center;justify-content:center;
+  transition:all var(--ant-motion-duration-mid);flex-shrink:0;
+  cursor:pointer;
+}
+.tgm-btn:hover{border-color:#ff4d4f;background:rgba(255,77,79,.18)}
+/* Botão gato — destaque */
+.tgm-cat{
+  width:60px;border-radius:var(--ant-border-radius);
+  background:rgba(255,77,79,.12);border:1px solid #ff4d4f;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;padding:5px 3px;
+  transition:all var(--ant-motion-duration-mid);flex-shrink:0;cursor:pointer;
+}
+.tgm-cat:hover{background:rgba(255,77,79,.25)}
+.tgm-cat span{font-size:9px;font-weight:700;color:#ff4d4f;white-space:nowrap}
+
+/* ── STAGE ──────────────────────────────────────────────────────── */
+#stage{flex:1;position:relative;background:#0a0c14;overflow:hidden;min-width:0}
+#canvas2d{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#three-mount{position:absolute;inset:0;display:none}
+#three-mount canvas{width:100%!important;height:100%!important;display:block}
+#hint2d{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;pointer-events:none;
+  opacity:.12;transition:opacity .3s}
+#hint2d .big{font-size:52px}
+#hint2d .txt{font-size:14px;font-weight:600;color:var(--ant-color-text-secondary)}
+#hole-badge{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  background:rgba(255,77,79,.85);border:1px solid #ff4d4f;
+  border-radius:100px;padding:3px 14px;font-size:12px;font-weight:700;
+  color:#fff;pointer-events:none;display:none}
+/* zoom overlay no viewport */
+#vp-zoom-bar{
+  position:absolute;top:10px;left:10px;z-index:20;
+  display:flex;align-items:center;gap:4px;
+  background:rgba(10,12,20,.75);border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;padding:5px 8px;backdrop-filter:blur(4px);
+}
+.vpz-btn{
+  background:var(--ant-color-fill-secondary);color:var(--ant-color-text);
+  border:1px solid var(--ant-color-border);border-radius:5px;
+  width:26px;height:26px;font-size:16px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;
+}
+.vpz-btn:hover{border-color:#1677ff;color:#1677ff}
+#vpz-val{font-size:11px;font-weight:700;color:var(--ant-color-text-secondary);
+  min-width:40px;text-align:center}
+.vpz-sep{width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0}
+
+#fh-cursor{position:absolute;pointer-events:none;border-radius:50%;
+  background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.4);
+  display:none;transform:translate(-50%,-50%)}
+
+/* ── RIGHT SIDEBAR ──────────────────────────────────────────────── */
+#rsb{
+  flex-shrink:0;width:var(--rsb);
+  background:var(--ant-color-bg-container);
+  border-left:1px solid var(--ant-color-border);
+  display:flex;flex-direction:column;padding:8px 8px;gap:4px;
+  overflow-y:auto;scrollbar-width:none;
+}
+#rsb::-webkit-scrollbar{display:none}
+.rsb-title{font-size:10px;font-weight:700;color:var(--ant-color-text-tertiary);
+  text-transform:uppercase;letter-spacing:.08em;padding:2px 4px;flex-shrink:0}
+.ach{
+  background:var(--ant-color-fill-tertiary);
+  border:1px solid var(--ant-color-border);
+  border-radius:var(--ant-border-radius);
+  padding:6px 8px;display:flex;align-items:center;gap:6px;
+  flex-shrink:0;transition:all .3s;
+}
+.ach.done{border-color:#52c41a;background:rgba(82,196,26,.08)}
+.ach-icon{font-size:15px;flex-shrink:0;opacity:.35;filter:grayscale(1);transition:all .3s}
+.ach.done .ach-icon{opacity:1;filter:none}
+.ach-body{flex:1;min-width:0}
+.ach-name{font-size:11px;font-weight:600;color:var(--ant-color-text);line-height:1.2}
+.ach-pts{font-size:10px;color:var(--ant-color-text-tertiary);font-weight:700;transition:color .3s}
+.ach.done .ach-pts{color:#52c41a}
+.ach-check{font-size:13px;opacity:0;transition:opacity .3s;flex-shrink:0}
+.ach.done .ach-check{opacity:1}
+
+/* ── BOTTOM BAR ─────────────────────────────────────────────────── */
+#bot{
+  flex-shrink:0;height:var(--bot);
+  background:var(--ant-color-bg-container);
+  border-top:1px solid var(--ant-color-border);
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;
+  overflow-x:auto;scrollbar-width:none;
+}
+#bot::-webkit-scrollbar{display:none}
+.bot-sep{width:1px;height:36px;background:var(--ant-color-border);flex-shrink:0}
+/* colour swatches */
+.col-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;
+  flex-shrink:0;cursor:pointer}
+.col-sw{width:52px;height:52px;border-radius:50%;
+  border:2px solid var(--ant-color-border);transition:all .12s;flex-shrink:0}
+.col-wrap.active .col-sw{border:2px solid #fff;transform:scale(1.2)}
+.col-lbl{font-size:13px;font-weight:700;color:var(--ant-color-text-tertiary);white-space:nowrap}
+.col-wrap.active .col-lbl{color:var(--ant-color-text)}
+.col-sw.hole{background:#111;position:relative}
+.col-sw.hole::after{content:"⊖";position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;font-size:14px;color:#ff4d4f}
+/* tool buttons */
+.tool-btn{
+  width:86px;height:86px;border-radius:var(--ant-border-radius);
+  background:var(--ant-color-fill-tertiary);
+  border:1px solid var(--ant-color-border);
+  font-size:36px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all var(--ant-motion-duration-mid);color:var(--ant-color-text);
+}
+.tool-btn:hover{border-color:var(--ant-color-text-secondary)}
+.tool-btn.active{background:#1677ff20;border-color:#1677ff;color:#1677ff}
+.tool-btn.danger.active{background:rgba(255,77,79,.15);border-color:#ff4d4f;color:#ff4d4f}
+.tool-btn:disabled{opacity:.3;cursor:default}
+/* STL btn */
+.btn-stl{
+  border-radius:var(--ant-border-radius);padding:7px 14px;
+  font-size:12px;font-weight:700;
+  background:#faad14;color:#000;
+  display:flex;align-items:center;gap:5px;flex-shrink:0;
+  transition:opacity var(--ant-motion-duration-fast);
+}
+.btn-stl:hover{opacity:.85}
+.btn-stl:disabled{opacity:.35;cursor:default}
+.btn-io{
+  border-radius:var(--ant-border-radius);padding:6px 11px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:4px;flex-shrink:0;
+  background:var(--ant-color-fill-tertiary);
+  color:var(--ant-color-text-secondary);
+  border:1px solid var(--ant-color-border);
+  transition:all var(--ant-motion-duration-fast);
+}
+.btn-io:hover{border-color:#1677ff;color:#1677ff}
+#load-input{display:none}
+/* viewport controls */
+.vp-btn{
+  border-radius:var(--ant-border-radius);padding:5px 9px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:3px;flex-shrink:0;
+  background:var(--ant-color-fill-secondary);
+  color:var(--ant-color-text-secondary);
+  border:1px solid var(--ant-color-border);
+  transition:all var(--ant-motion-duration-fast);
+}
+.vp-btn:hover{border-color:var(--ant-color-primary);color:var(--ant-color-primary)}
+.vp-btn.active{background:var(--ant-color-primary-bg);border-color:var(--ant-color-primary);color:var(--ant-color-primary)}
+#zoom-val{font-size:11px;color:var(--ant-color-text-tertiary);min-width:36px;text-align:center;flex-shrink:0}
+
+/* ── TOAST ──────────────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:calc(var(--bot)+14px);left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:#52c41a;color:#fff;
+  border-radius:100px;padding:7px 20px;
+  font-size:13px;font-weight:600;
+  opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#ach-pop{
+  position:fixed;top:calc(var(--hdr)+10px);right:calc(var(--rsb)+10px);
+  background:#52c41a;color:#fff;border-radius:var(--ant-border-radius-lg);
+  padding:9px 16px;font-size:13px;font-weight:600;
+  opacity:0;transform:translateY(-8px);transition:all .35s;z-index:998;pointer-events:none;
+}
+#ach-pop.show{opacity:1;transform:translateY(0)}
+
+/* ── CERTIFICATE ─────────────────────────────────────────────────── */
+#cert-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;
+  display:none;align-items:center;justify-content:center;padding:12px}
+#cert-modal.open{display:flex}
+#cert-inner{
+  background:#C8922A;border-radius:16px;
+  width:min(720px,98vw);max-height:96vh;overflow:hidden;
+  position:relative;display:grid;grid-template-columns:1fr 1fr;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+#cert-deco{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+#cert-left{
+  background:#f5d060;border-radius:14px 0 0 14px;
+  padding:28px 20px 20px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;text-align:center;
+  position:relative;z-index:1;
+}
+#cert-left .cert-logo{font-size:16px;font-weight:800;color:#7a4a00}
+#cert-left .cert-logo span{color:#1677ff}
+#cert-left .cert-title{font-size:20px;font-weight:900;color:#7a4a00;line-height:1.1;margin:5px 0 2px}
+#cert-left .cert-sub2{font-size:10px;color:#a06000;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+#cert-name-in{border:2px solid #c8922a;border-radius:var(--ant-border-radius);
+  padding:7px 10px;font-size:14px;width:100%;margin:8px 0 3px;
+  font-family:inherit;background:#fff8e8;color:#5c3400;text-align:center}
+.cert-name-show{font-size:18px;font-weight:800;color:#5c3400;min-height:26px;margin:2px 0 6px}
+.cert-stars-row{display:flex;gap:3px;justify-content:center;margin:5px 0}
+.cert-star-svg{width:28px;height:28px}
+.cert-star-svg.lit path{fill:#ff9900}
+.cert-star-svg.dim path{fill:#d4a84b}
+.cert-score-wrap{background:#fff8e8;border-radius:12px;padding:7px 16px;margin:3px 0}
+.cert-score-num{font-size:36px;font-weight:900;color:#7a4a00;line-height:1}
+.cert-score-lbl{font-size:10px;font-weight:700;color:#a06000;text-transform:uppercase;letter-spacing:.1em}
+#cert-right{padding:20px 18px 16px 14px;display:flex;flex-direction:column;
+  gap:6px;position:relative;z-index:1;overflow-y:auto}
+#cert-right h2{font-size:12px;font-weight:800;color:#fff8e0;
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.cert-achs{display:flex;flex-direction:column;gap:3px;flex:1}
+.cert-ach-tag{background:rgba(255,255,255,.18);border-radius:100px;
+  padding:3px 10px;font-size:11px;font-weight:600;color:#fff8e0;
+  display:flex;align-items:center;gap:5px}
+.cert-ach-tag.done{background:rgba(255,255,255,.36);color:#fff}
+.cert-ach-tag .dot{width:6px;height:6px;border-radius:50%;
+  background:rgba(255,248,224,.4);flex-shrink:0}
+.cert-ach-tag.done .dot{background:#52c41a}
+.cert-actions{display:flex;gap:6px;margin-top:auto;padding-top:6px}
+.cert-print{background:#141414;color:#fff;border-radius:var(--ant-border-radius);
+  padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;
+  border:none;font-family:inherit;flex:1}
+.cert-close-btn{background:rgba(255,255,255,.2);color:#fff;
+  border-radius:var(--ant-border-radius);padding:8px 12px;
+  font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+@media print{
+  #cert-modal{position:static;background:none;padding:0;display:flex!important}
+  #cert-inner{width:100%;max-height:none;box-shadow:none}
+  .cert-actions{display:none}
+  body>*:not(#cert-modal){display:none!important}
+  @page{size:landscape;margin:.5cm}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="logo">monco <span>3D</span></div>
+  <button class="hdr-btn active" id="tab2d" onclick="setMode('2d')">✏️ Construir</button>
+  <button class="hdr-btn" id="tab3d" onclick="setMode('3d')" disabled>🔮 Ver em 3D</button>
+  <span style="color:var(--ant-color-border);font-size:20px;padding:0 2px;flex-shrink:0">|</span>
+  <button id="hdr-stl" onclick="downloadSTL()" style="background:#faad14;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;opacity:.5" title="Guardar STL">💾 STL</button>
+  <button onclick="saveJSON()" style="background:var(--ant-color-fill-secondary);color:var(--ant-color-text-secondary);border:1px solid var(--ant-color-border);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0" title="Guardar JSON">📥 Guardar</button>
+  <button onclick="document.getElementById('load-input').click()" style="background:var(--ant-color-fill-secondary);color:var(--ant-color-text-secondary);border:1px solid var(--ant-color-border);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0" title="Carregar JSON">📤 Carregar</button>
+  <div id="score-badge">⭐ <span id="score-val">0</span> pts</div>
+  <button id="cert-btn" onclick="openCert()">🏆 Certificado</button>
+</div>
+
+<!-- BODY ROW: lsb | tgm-panel | stage | rsb -->
+<div id="body-row">
+
+  <!-- LEFT SIDEBAR — formas primitivas -->
+  <div id="lsb">
+    <div class="lsb-label">FORMAS</div>
+
+    <button class="shape-btn" data-shape="freehand" title="Desenho livre">
+      <svg width="42" height="42" viewBox="-21 -21 42 42">
+        <path d="M-14,9 Q-9,-14 0,3 Q9,16 14,-11"
+          fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.5"
+          stroke-linecap="round" stroke-dasharray="5 3"/>
+      </svg>
+    </button>
+
+    <div class="lsb-sep"></div>
+
+    <button class="shape-btn" data-shape="rect" title="Quadrado">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <rect x="-13" y="-13" width="26" height="26" rx="2"
+          fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+    <button class="shape-btn" data-shape="circle" title="Círculo">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <circle cx="0" cy="0" r="13" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+    <button class="shape-btn" data-shape="triangle" title="Triângulo">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <polygon points="0,-14 14,12 -14,12" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+    <button class="shape-btn" data-shape="star" title="Estrela">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <polygon points="0,-14 3.5,-4.5 13,-4.5 5.5,2 8.5,12 0,6.5 -8.5,12 -5.5,2 -13,-4.5 -3.5,-4.5"
+          fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+    <button class="shape-btn" data-shape="heart" title="Coração">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <path d="M0,11 C-15,-2 -15,-15 0,-7 C15,-15 15,-2 0,11 Z"
+          fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+    <button class="shape-btn" data-shape="hex" title="Hexágono">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <polygon points="13,0 6.5,11 -6.5,11 -13,0 -6.5,-11 6.5,-11"
+          fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+    <button class="shape-btn" data-shape="arrow" title="Seta">
+      <svg width="34" height="34" viewBox="-17 -17 34 34">
+        <polygon points="-13,-4 3,-4 3,-12 13,0 3,12 3,4 -13,4"
+          fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+      </svg>
+    </button>
+
+
+    <div class="lsb-sep"></div>
+    <div class="lsb-label">TANGRAM</div>
+    <button class="shape-btn" id="btn-tgm-toggle" onclick="toggleTgm()" title="Peças Tangram">
+      <svg width="34" height="34" viewBox="0 0 34 34">
+        <polygon points="2,2 17,2 2,17"   fill="rgba(255,77,79,.85)"/>
+        <polygon points="32,32 17,32 32,17" fill="rgba(255,77,79,.85)"/>
+        <polygon points="17,2 32,2 32,17"  fill="rgba(255,77,79,.6)"/>
+        <polygon points="2,17 9,24 2,32"   fill="rgba(255,77,79,.6)"/>
+        <polygon points="17,17 24,17 17,24" fill="rgba(255,77,79,.6)"/>
+        <rect x="9" y="24" width="8" height="8" fill="rgba(255,77,79,.6)"/>
+        <polygon points="9,24 17,17 24,17 17,24" fill="rgba(255,77,79,.4)"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- TANGRAM PANEL — abre/fecha ao clicar no botão acima -->
+  <div id="tgm-panel">
+    <div class="tgm-label">TANGRAM</div>
+    <div style="font-size:8px;color:#ff4d4f60;text-align:center;line-height:1.2;padding:0 2px">7 peças</div>
+
+    <!-- Tri. Grande A: rectângulo, ângulo recto em baixo-esquerda -->
+    <button class="tgm-btn" data-tangram="tg-L1" title="Triângulo grande">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <polygon points="2,42 42,42 2,2" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <!-- Tri. Grande B: espelho, ângulo recto em baixo-direita -->
+    <button class="tgm-btn" data-tangram="tg-L2" title="Triângulo grande">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <polygon points="2,42 42,42 42,2" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <!-- Tri. Médio: rectângulo menor, ângulo recto em baixo-esquerda -->
+    <button class="tgm-btn" data-tangram="tg-M" title="Triângulo médio">
+      <svg width="38" height="38" viewBox="0 0 38 38">
+        <polygon points="2,36 36,36 2,2" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <!-- Tri. Pequeno A: rectângulo pequeno, ângulo recto em baixo-esquerda -->
+    <button class="tgm-btn" data-tangram="tg-S1" title="Triângulo pequeno">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <polygon points="2,30 30,30 2,2" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <!-- Tri. Pequeno B: espelho, ângulo recto em baixo-direita -->
+    <button class="tgm-btn" data-tangram="tg-S2" title="Triângulo pequeno">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <polygon points="2,30 30,30 30,2" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <!-- Quadrado: mostrado na horizontal (não losango) -->
+    <button class="tgm-btn" data-tangram="tg-SQ" title="Quadrado">
+      <svg width="36" height="36" viewBox="0 0 36 36">
+        <rect x="3" y="3" width="30" height="30" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <!-- Paralelogramo: inclinado à direita -->
+    <button class="tgm-btn" data-tangram="tg-P" title="Paralelogramo">
+      <svg width="52" height="30" viewBox="0 0 52 30">
+        <polygon points="0,28 14,2 50,2 36,28" fill="#ff4d4f"/>
+      </svg>
+    </button>
+
+    <div class="tgm-sep"></div>
+
+    <!-- Botão Gato -->
+    <button class="tgm-cat" onclick="placeTangramCat()" title="Gato tangram">
+      <svg width="52" height="56" viewBox="0 0 90 100">
+        <polygon points="8,88 44,52 8,52" fill="#FF6B35"/>
+        <polygon points="8,88 44,88 44,52" fill="#4ecb71"/>
+        <polygon points="8,52 44,52 26,32" fill="#4D96FF"/>
+        <polygon points="26,12 44,32 26,52 8,32" fill="#FFD93D"/>
+        <polygon points="8,32 0,12 16,24" fill="#FF6B35"/>
+        <polygon points="44,32 54,12 38,24" fill="#ff4d4f"/>
+        <polygon points="44,88 58,72 72,88 58,104" fill="#a259ff"/>
+      </svg>
+      <span>🐱 GATO</span>
+    </button>
+  </div>
+
+  <!-- STAGE — canvas de trabalho -->
+  <div id="stage">
+    <canvas id="canvas2d"></canvas>
+    <div id="three-mount"></div>
+    <div id="hint2d">
+      <div class="big">👈</div>
+      <div class="txt">Escolhe uma forma à esquerda!</div>
+    </div>
+    <div id="fh-cursor"></div>
+  <!-- Zoom bar — canto sup-esq do viewport -->
+  <div id="vp-zoom-bar">
+    <button class="vpz-btn" id="vpz-out" title="Zoom out">−</button>
+    <span id="vpz-val">200%</span>
+    <button class="vpz-btn" id="vpz-in"  title="Zoom in">+</button>
+    <div class="vpz-sep"></div>
+    <button class="vpz-btn" id="vpz-fit" title="Fit All" style="width:auto;padding:0 6px;font-size:11px;font-weight:700">⊡</button>
+    <button class="vpz-btn" id="vpz-1"   title="Reset 1:1" style="width:auto;padding:0 6px;font-size:11px;font-weight:700">1:1</button>
+    <div class="vpz-sep"></div>
+    <button class="vpz-btn" id="vpz-snap" title="Snap (S)" style="width:auto;padding:0 6px;font-size:11px;font-weight:700;color:#1677ff;border-color:#1677ff">⊞</button>
+    <select id="vpz-grid" style="background:transparent;color:var(--ant-color-text-secondary);border:none;font-size:11px;cursor:pointer;outline:none">
+      <option value="10">10px</option>
+      <option value="20" selected>20px</option>
+      <option value="40">40px</option>
+      <option value="80">80px</option>
+    </select>
+  </div>
+    <div id="hole-badge">⊖ MODO ORIFÍCIO</div>
+  </div>
+
+  <!-- RIGHT SIDEBAR — conquistas -->
+  <div id="rsb">
+    <div class="rsb-title">🏅 Conquistas</div>
+  </div>
+
+</div><!-- /body-row -->
+
+<!-- BOTTOM BAR -->
+<div id="bot"></div>
+
+</div><!-- /app -->
+
+<div id="ach-popup">
+  <span class="pop-icon" id="pop-icon">⭐</span>
+  <div class="pop-name" id="pop-name">Conquista!</div>
+  <div class="pop-pts" id="pop-pts">+10 pts</div>
+</div>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="toast"></div>
+<div id="ach-pop"></div>
+<!-- CERTIFICATE -->
+<div id="cert-modal">
+  <div id="cert-inner">
+
+    <!-- Decorative background stars -->
+    <svg id="cert-deco" viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg">
+      <!-- big decorative stars scattered -->
+      <polygon points="680,30 686,50 706,50 691,62 697,82 680,70 663,82 669,62 654,50 674,50" fill="rgba(255,255,255,0.12)"/>
+      <polygon points="40,380 44,393 58,393 47,401 51,414 40,406 29,414 33,401 22,393 36,393" fill="rgba(255,255,255,0.12)"/>
+      <polygon points="600,380 603,390 614,390 605,396 609,407 600,401 591,407 595,396 586,390 597,390" fill="rgba(255,255,255,0.10)"/>
+      <polygon points="700,200 703,210 714,210 705,216 709,227 700,221 691,227 695,216 686,210 697,210" fill="rgba(255,255,255,0.10)"/>
+      <polygon points="660,300 662,307 670,307 664,311 666,319 660,315 654,319 656,311 650,307 658,307" fill="rgba(255,255,255,0.09)"/>
+      <!-- dots / confetti -->
+      <circle cx="620" cy="60"  r="5" fill="rgba(255,255,255,0.15)"/>
+      <circle cx="640" cy="130" r="3" fill="rgba(255,255,255,0.12)"/>
+      <circle cx="695" cy="100" r="4" fill="rgba(255,255,255,0.10)"/>
+      <circle cx="620" cy="340" r="4" fill="rgba(255,255,255,0.10)"/>
+      <circle cx="680" cy="380" r="3" fill="rgba(255,255,255,0.10)"/>
+      <!-- ribbon banner shape top-right -->
+      <path d="M560,0 Q720,0 720,60 L720,0 Z" fill="rgba(255,255,255,0.07)"/>
+      <!-- wave bottom-right -->
+      <path d="M400,420 Q520,380 640,420 L720,420 L720,380 Q600,340 480,380 Q420,400 360,420Z" fill="rgba(255,200,80,0.18)"/>
+    </svg>
+
+    <!-- LEFT PANEL -->
+    <div id="cert-left">
+      <div class="cert-logo">monco <span>3D</span></div>
+      <div class="cert-title">Certificado<br>de Criador</div>
+      <div class="cert-sub2">Modelação &amp; Impressão 3D</div>
+
+      <!-- star rating -->
+      <div class="cert-stars-row" id="cert-stars-row">
+        <!-- injected by JS -->
+      </div>
+
+      <input id="cert-name-in" placeholder="O teu nome aqui..." maxlength="40">
+      <div class="cert-name-show" id="cert-name-show">—</div>
+
+      <div class="cert-score-wrap">
+        <div class="cert-score-num" id="cert-score-show">0</div>
+        <div class="cert-score-lbl">pontos conquistados</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div id="cert-right">
+      <h2>🏅 Conquistas desbloqueadas</h2>
+      <div class="cert-achs" id="cert-achs-show"></div>
+      <div class="cert-actions">
+        <button class="cert-print" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="cert-close-btn" onclick="closeCert()">✕ Fechar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js"></script>
+<script>
+'use strict';
+
+// ═══════════════════════════════════════
+// COLOUR → Z mapping  (mm)
+// ═══════════════════════════════════════
+const COLOR_DEFS = [
+  { hex:'#4D96FF', label:'1 mm',  z:1,  name:'Azul'    },
+  { hex:'#FF6B35', label:'3 mm',  z:3,  name:'Laranja'  },
+  { hex:'#C8922A', label:'5 mm',  z:5,  name:'Amarelo'  },
+  { hex:'#000000', label:'Furo',  z:0,  name:'Orifício', hole:true },
+];
+const HOLE_COLOR  = '#000000';
+const Z_FREEHAND  = 6;   // mm — livre ligeiramente mais alto que amarelo (5mm)
+const SHAPE_SIZE  = 60;
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let mode       = '2d';
+let activeTool = 'select';   // select | erase | freehand
+let activeColor = COLOR_DEFS[0].hex;
+let shapes     = [];
+let selectedIds= new Set();  // multi-select via lasso
+let nextId     = 1;
+let drag       = null;
+
+// ── Viewport (zoom + pan) ───────────────
+let vpZoom = 2;
+let vpPanX = 0;
+let vpPanY = 0;
+let panning = false, panStartX=0, panStartY=0, panOrigX=0, panOrigY=0;
+let spaceDown = false;
+
+// ── Snap to grid ─────────────────────────
+let snapOn   = true;
+let snapSize = 20;
+function snapV(v){ return snapOn ? Math.round(v/snapSize)*snapSize : v; }
+
+// undo / redo stacks  (deep-copy snapshots of shapes[])
+let undoStack  = [];
+let redoStack  = [];
+
+// lasso state
+let lasso      = null; // {x1,y1,x2,y2} while dragging on empty space
+
+// group xform (multi-select handles: gmove | gscale | grotate)
+let groupXform = null;
+
+// freehand
+let fhDrawing  = false;
+let fhCurrent  = [];
+
+// ═══════════════════════════════════════
+// HISTORY helpers
+// ═══════════════════════════════════════
+function snapshot() {
+  return JSON.parse(JSON.stringify(shapes));
+}
+function pushUndo() {
+  undoStack.push(snapshot());
+  if (undoStack.length > 60) undoStack.shift();
+  redoStack = [];
+  updateHistoryBtns();
+}
+function undo() {
+  if (!undoStack.length) return;
+  redoStack.push(snapshot());
+  shapes = undoStack.pop();
+  selectedIds.clear(); lasso=null;groupXform=null;
+  redraw(); updateAchs(); updateHistoryBtns();
+}
+function redo() {
+  if (!redoStack.length) return;
+  undoStack.push(snapshot());
+  shapes = redoStack.pop();
+  selectedIds.clear(); lasso=null;groupXform=null;
+  redraw(); updateAchs(); updateHistoryBtns();
+}
+function updateHistoryBtns() {
+  const ub = document.getElementById('btn-undo');
+  const rb = document.getElementById('btn-redo');
+  if (ub) ub.disabled = !undoStack.length;
+  if (rb) rb.disabled = !redoStack.length;
+}
+
+// ═══════════════════════════════════════
+// ACHIEVEMENTS
+// ═══════════════════════════════════════
+const ACHS = [
+  {id:'rect',    icon:'⬛', name:'Usaste um Quadrado',      pts:10, done:false},
+  {id:'circle',  icon:'⭕', name:'Usaste um Círculo',       pts:10, done:false},
+  {id:'triangle',icon:'🔺', name:'Usaste um Triângulo',     pts:10, done:false},
+  {id:'star',    icon:'⭐', name:'Usaste uma Estrela',      pts:15, done:false},
+  {id:'heart',   icon:'❤️', name:'Usaste um Coração',       pts:15, done:false},
+  {id:'hole',    icon:'⊖',  name:'Fizeste um Orifício',     pts:20, done:false},
+  {id:'freehand',icon:'✏️', name:'Desenho Livre',           pts:15, done:false},
+  {id:'scale',   icon:'📐', name:'Escalaste uma forma',     pts:10, done:false},
+  {id:'rotate',  icon:'🔄', name:'Rodaste uma forma',       pts:10, done:false},
+  {id:'multi',   icon:'🖱️', name:'Selecionaste múltiplas',  pts:10, done:false},
+  {id:'shapes5', icon:'🏗️', name:'Criaste 5 formas',        pts:20, done:false},
+  {id:'view3d',  icon:'🔮', name:'Viste em 3D',             pts:25, done:false},
+  {id:'stl',     icon:'🖨️', name:'Guardaste para imprimir', pts:30, done:false},
+];
+let score = 0;
+
+(function buildAchs(){
+  const rsb=document.getElementById('rsb');
+  ACHS.forEach(a=>{
+    const el=document.createElement('div');
+    el.className='ach';el.id='ach-'+a.id;
+    el.innerHTML=`<div class="ach-icon">${a.icon}</div>
+      <div class="ach-body"><div class="ach-name">${a.name}</div>
+      <div class="ach-pts">+${a.pts} pts</div></div>
+      <div class="ach-check">✅</div>`;
+    rsb.appendChild(el);
+  });
+})();
+
+function unlockAch(id){
+  const a=ACHS.find(a=>a.id===id);
+  if(!a||a.done)return;
+  a.done=true;score+=a.pts;
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('ach-'+id).classList.add('done');
+  showAchPop(a.name, a.icon, a.pts);
+}
+function showAchPop(msg, icon, pts){
+  // popup central
+  const pop=document.getElementById('ach-popup');
+  if(pop){
+    document.getElementById('pop-icon').textContent=icon||'⭐';
+    document.getElementById('pop-name').textContent=msg||'Conquista!';
+    document.getElementById('pop-pts').textContent=(pts?'+'+pts+' pts':'');
+    pop.classList.add('show');
+    launchConfetti();
+    setTimeout(()=>pop.classList.remove('show'),2800);
+  }
+}
+
+// ═══════════════════════════════════════
+// BUILD BOTTOM BAR
+// ═══════════════════════════════════════
+(function buildBot(){
+  const bot=document.getElementById('bot');
+
+  // colour + height swatches
+  COLOR_DEFS.forEach(cd=>{
+    const wrap=document.createElement('div');
+    wrap.className='col-wrap'+(cd.hex===activeColor?' active':'');
+    wrap.title=cd.name+(cd.hole?'':' — '+cd.label);
+
+    const sw=document.createElement('div');
+    sw.className='col-sw'+(cd.hole?' hole':'');
+    if(!cd.hole) sw.style.background=cd.hex;
+
+    const lbl=document.createElement('div');
+    lbl.className='col-lbl';
+    lbl.textContent=cd.label;
+
+    wrap.appendChild(sw);
+    wrap.appendChild(lbl);
+    wrap.onclick=()=>{
+      document.querySelectorAll('.col-wrap').forEach(x=>x.classList.remove('active'));
+      wrap.classList.add('active');
+      activeColor=cd.hex;
+      // apply to selected shapes
+      if(selectedIds.size){
+        pushUndo();
+        shapes.forEach(s=>{
+        if(!selectedIds.has(s.id))return;
+        s.color=cd.hex;
+        s.zMm=cd.hole?0:cd.z; // actualizar zMm para todos os tipos incluindo freehand
+      });
+        redraw();
+      }
+      updateHoleBadge();
+    };
+    bot.appendChild(wrap);
+  });
+
+  bot.appendChild(mkSep());
+
+  // select
+  bot.appendChild(mkToolBtn('👆','select','Seleccionar / Mover'));
+  // erase
+  const eb=mkToolBtn('🧹','erase','Apagar forma');
+  eb.classList.add('danger');bot.appendChild(eb);
+  // duplicate
+  const dupBtn=mkToolBtn('⧉','duplicate','Duplicar forma');
+  dupBtn.querySelector&&(dupBtn.style.color='#fff');
+  bot.appendChild(dupBtn);
+  // undo
+  const ub=document.createElement('button');
+  ub.className='tool-btn';ub.id='btn-undo';ub.textContent='↩️';
+  ub.title='Desfazer (Ctrl+Z)';ub.disabled=true;ub.onclick=undo;
+  bot.appendChild(ub);
+  // redo
+  const rb=document.createElement('button');
+  rb.className='tool-btn';rb.id='btn-redo';rb.textContent='↪️';
+  rb.title='Refazer (Ctrl+Y)';rb.disabled=true;rb.onclick=redo;
+  bot.appendChild(rb);
+
+  bot.appendChild(mkSep());
+
+  // STL
+  // file input para load
+  const fi=document.createElement('input');
+  fi.type='file';fi.accept='.json';fi.id='load-input';
+  fi.onchange=loadJSON;document.body.appendChild(fi);
+})();
+
+function mkSep(){const d=document.createElement('div');d.className='bot-sep';return d;}
+function mkToolBtn(emoji,toolName,title){
+  const b=document.createElement('button');
+  b.className='tool-btn'+(activeTool===toolName?' active':'');
+  b.title=title;b.textContent=emoji;b.dataset.tool=toolName;
+  b.onclick=()=>{
+    activeTool=toolName;
+    document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    selectedIds.clear();fhDrawing=false;fhCurrent=[];lasso=null;groupXform=null;
+    canvas.style.cursor=toolName==='erase'?'crosshair':'default';
+    redraw();
+  };
+  return b;
+}
+function updateHoleBadge(){
+  document.getElementById('hole-badge').style.display=
+    activeColor===HOLE_COLOR?'block':'none';
+}
+
+// Keyboard shortcuts
+window.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.shiftKey&&e.key==='z'))){e.preventDefault();redo();}
+  if(e.key==='s'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'){
+    snapOn=!snapOn;
+    const btn=document.getElementById('btn-snap');
+    if(btn)btn.classList.toggle('active',snapOn);
+    redraw();
+  }
+  if(e.key==='Delete'||e.key==='Backspace'){
+    if(selectedIds.size){
+      pushUndo();
+      shapes=shapes.filter(s=>!selectedIds.has(s.id));
+      selectedIds.clear();redraw();updateAchs();
+    }
+  }
+});
+
+// ═══════════════════════════════════════
+// PALETTE
+// ═══════════════════════════════════════
+document.querySelectorAll('.shape-btn[data-shape]').forEach(btn=>{
+  btn.onclick=()=>{
+    if(mode!=='2d'){setMode('2d');return;}
+    const type=btn.dataset.shape;
+
+    if(type==='freehand'){
+      activeTool='freehand';
+      document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.shape-btn[data-shape]').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      canvas.style.cursor='crosshair';
+      showToast('✏️ Desenha livremente no canvas!');
+      return;
+    }
+
+    document.querySelectorAll('.shape-btn[data-shape]').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    if(activeTool==='freehand'){
+      activeTool='select';
+      document.querySelectorAll('[data-tool="select"]').forEach(x=>x.classList.add('active'));
+      canvas.style.cursor='default';
+    }
+
+    pushUndo();
+    const cd=COLOR_DEFS.find(c=>c.hex===activeColor)||COLOR_DEFS[0];
+    const s={
+      id:nextId++,type,
+      x:(canvas.width/2-vpPanX)/vpZoom+(Math.random()-.5)*30,
+      y:(canvas.height/2-vpPanY)/vpZoom+(Math.random()-.5)*30,
+      w:SHAPE_SIZE,h:SHAPE_SIZE,rot:0,
+      color:activeColor,
+      zMm:cd.hole?0:cd.z,
+    };
+    shapes.push(s);
+    selectedIds=new Set([s.id]);
+    redraw();updateAchs();
+    if(['rect','circle','triangle','star','heart'].includes(type)) unlockAch(type);
+    if(activeColor===HOLE_COLOR) unlockAch('hole');
+  };
+});
+
+// ═══════════════════════════════════════
+// CANVAS 2D
+// ═══════════════════════════════════════
+const canvas=document.getElementById('canvas2d');
+const ctx=canvas.getContext('2d');
+
+function resizeCanvas(){
+  // usar getBoundingClientRect para apanhar o tamanho real após reflow CSS
+  const r=document.getElementById('stage').getBoundingClientRect();
+  canvas.width=Math.round(r.width);canvas.height=Math.round(r.height);redraw();
+}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,60);
+
+// shape path — local coords (translate + rotate done outside)
+function shapePath(ctx,s){
+  const hw=s.w/2,hh=s.h/2;
+  ctx.beginPath();
+  switch(s.type){
+    case 'rect': ctx.rect(-hw,-hh,s.w,s.h);break;
+    case 'circle': ctx.ellipse(0,0,hw,hh,0,0,Math.PI*2);break;
+    case 'triangle': ctx.moveTo(0,-hh);ctx.lineTo(hw,hh);ctx.lineTo(-hw,hh);ctx.closePath();break;
+    case 'star':{
+      const spikes=5,outerR=hw,innerR=hw*.42;
+      for(let i=0;i<spikes*2;i++){
+        const r=i%2===0?outerR:innerR,a=i*Math.PI/spikes-Math.PI/2;
+        i===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+      }
+      ctx.closePath();break;
+    }
+    case 'heart':
+      ctx.moveTo(0,hh*.6);
+      ctx.bezierCurveTo(-hw*1.1,-hh*.1,-hw*1.1,-hh,0,-hh*.4);
+      ctx.bezierCurveTo(hw*1.1,-hh,hw*1.1,-hh*.1,0,hh*.6);
+      ctx.closePath();break;
+    case 'hex':
+      for(let i=0;i<6;i++){const a=i*Math.PI/3-Math.PI/6;
+        i===0?ctx.moveTo(Math.cos(a)*hw,Math.sin(a)*hh):ctx.lineTo(Math.cos(a)*hw,Math.sin(a)*hh);}
+      ctx.closePath();break;
+    case 'arrow':{
+      const bw=hw*.55,bh=hh*.45;
+      ctx.moveTo(-hw,-bh);ctx.lineTo(0,-bh);ctx.lineTo(0,-hh);
+      ctx.lineTo(hw,0);ctx.lineTo(0,hh);ctx.lineTo(0,bh);ctx.lineTo(-hw,bh);
+      ctx.closePath();break;
+    }
+    case 'para':{
+      // paralelogramo: topo deslocado hw*0.4 à direita
+      const sh=hw*0.45;
+      ctx.moveTo(-hw+sh,-hh);ctx.lineTo(hw+sh,-hh);
+      ctx.lineTo(hw-sh,hh);ctx.lineTo(-hw-sh,hh);
+      ctx.closePath();break;
+    }
+    case 'freehand':
+      if(!s.fhPoints||s.fhPoints.length<2)break;
+      ctx.moveTo(s.fhPoints[0].x,s.fhPoints[0].y);
+      for(let i=1;i<s.fhPoints.length;i++) ctx.lineTo(s.fhPoints[i].x,s.fhPoints[i].y);
+      ctx.closePath();break;
+  }
+}
+
+function colorLabel(s){
+  if(s.color===HOLE_COLOR) return null;
+  const cd=COLOR_DEFS.find(c=>c.hex===s.color);
+  return cd?cd.label:null;
+}
+
+function redraw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // ── grelha (screen space, sem vp transform) ─────────────────────
+  if(mode==='2d'){
+    if(snapOn){
+      const gs=Math.max(4, snapSize*vpZoom);
+      const ox=((vpPanX%gs)+gs)%gs, oy=((vpPanY%gs)+gs)%gs;
+      ctx.fillStyle='rgba(255,255,255,0.055)';
+      for(let gx=ox-gs;gx<canvas.width+gs;gx+=gs)
+        for(let gy=oy-gs;gy<canvas.height+gs;gy+=gs)
+          ctx.fillRect(gx-1,gy-1,2,2);
+    } else {
+      ctx.fillStyle='rgba(255,255,255,0.03)';
+      for(let x=24;x<canvas.width;x+=32)
+        for(let y=24;y<canvas.height;y+=32)
+          ctx.fillRect(x-1,y-1,2,2);
+    }
+  }
+
+  // ── aplicar viewport (zoom + pan) ───────────────────────────────
+  ctx.save();
+  ctx.translate(vpPanX, vpPanY);
+  ctx.scale(vpZoom, vpZoom);
+
+  // ── desenhar shapes ─────────────────────────────────────────────
+  shapes.forEach(s=>{
+    const isHole=s.color===HOLE_COLOR;
+    const isSel=selectedIds.has(s.id);
+    ctx.save();
+    if(s.type!=='freehand'){ctx.translate(s.x,s.y);ctx.rotate(s.rot);}
+    shapePath(ctx,s);
+    ctx.fillStyle=isHole?'rgba(0,0,0,.6)':s.color+'cc';
+    ctx.strokeStyle=isSel?'#fff':(isHole?'#ff4444':s.color);
+    ctx.lineWidth=isSel?3:1.5;
+    if(isHole)ctx.setLineDash([4,3]);
+    ctx.fill();ctx.stroke();
+    ctx.setLineDash([]);
+    if(isHole&&s.type!=='freehand'){
+      ctx.fillStyle='#ff4444';ctx.font='bold 12px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('⊖',0,0);
+    }
+    if(!isHole&&s.type!=='freehand'){
+      const lbl=colorLabel(s);
+      if(lbl){
+        ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(-18,-7,36,14);
+        ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';
+        ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lbl,0,0);
+      }
+    }
+    ctx.restore();
+    if(isSel&&selectedIds.size===1) drawHandles(s);
+  });
+
+  // ── freehand in-progress ─────────────────────────────────────────
+  if(fhDrawing&&fhCurrent.length>1){
+    ctx.beginPath();
+    ctx.moveTo(fhCurrent[0].x,fhCurrent[0].y);
+    for(let i=1;i<fhCurrent.length;i++) ctx.lineTo(fhCurrent[i].x,fhCurrent[i].y);
+    ctx.strokeStyle=activeColor===HOLE_COLOR?'#ff4444':activeColor;
+    ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+    if(activeColor===HOLE_COLOR)ctx.setLineDash([4,3]);
+    ctx.stroke();ctx.setLineDash([]);
+  }
+
+  ctx.restore(); // fim viewport transform
+
+  // group handles for multi-select (em screen space — sem vp transform)
+  if(selectedIds.size>1){
+    const sel=shapes.filter(s=>selectedIds.has(s.id));
+    if(sel.length>0){
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      sel.forEach(s=>{
+        if(s.type==='freehand'){
+          // freehand: use raw fhPoints bounds
+          if(s.fhPoints) s.fhPoints.forEach(p=>{
+            minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);
+            maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y);
+          });
+          return;
+        }
+        const hw=s.w/2,hh=s.h/2;
+        [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].forEach(([lx,ly])=>{
+          const cos=Math.cos(s.rot),sin=Math.sin(s.rot);
+          const wx=s.x+lx*cos-ly*sin,wy=s.y+lx*sin+ly*cos;
+          minX=Math.min(minX,wx);minY=Math.min(minY,wy);
+          maxX=Math.max(maxX,wx);maxY=Math.max(maxY,wy);
+        });
+      });
+      const pad=22;
+      const bx=minX-pad,by=minY-pad,bw=maxX-minX+pad*2,bh=maxY-minY+pad*2;
+      const cx=bx+bw/2,cy=by+bh/2;
+      ctx.save();
+      // converter world→screen para os group handles
+      ctx.translate(vpPanX,vpPanY); ctx.scale(vpZoom,vpZoom);
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      // bounding box
+      ctx.strokeStyle='#4d96ff';ctx.lineWidth=2/vpZoom;ctx.setLineDash([6/vpZoom,4/vpZoom]);
+      ctx.strokeRect(bx,by,bw,bh);ctx.setLineDash([]);
+      // stem top → rotate
+      ctx.beginPath();ctx.moveTo(cx,by);ctx.lineTo(cx,by-14);
+      ctx.strokeStyle='#ffffff66';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,by-22,10/vpZoom,0,Math.PI*2);
+      ctx.fillStyle='#a259ff';ctx.strokeStyle='#fff';ctx.lineWidth=2/vpZoom;
+      ctx.fill();ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='13px sans-serif';
+      ctx.fillText('↺',cx,by-22);
+      // stem bottom → deform
+      ctx.beginPath();ctx.moveTo(cx,by+bh);ctx.lineTo(cx,by+bh+14);
+      ctx.strokeStyle='#ffffff66';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,by+bh+22,10/vpZoom,0,Math.PI*2);
+      ctx.fillStyle='#4ecb71';ctx.strokeStyle='#fff';ctx.lineWidth=2/vpZoom;
+      ctx.fill();ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';
+      ctx.fillText('⤡',cx,by+bh+22);
+      ctx.restore();
+      // store bounding info for hit testing
+      window._grpBounds={bx,by,bw,bh,cx,cy};
+    }
+  } else { window._grpBounds=null; }
+
+  // lasso rectangle
+  if(lasso){
+    // lasso em world coords → converter para screen
+    const lx1=lasso.x1*vpZoom+vpPanX, ly1=lasso.y1*vpZoom+vpPanY;
+    const lx2=lasso.x2*vpZoom+vpPanX, ly2=lasso.y2*vpZoom+vpPanY;
+    ctx.strokeStyle='#4d96ff';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+    ctx.strokeRect(Math.min(lx1,lx2),Math.min(ly1,ly2),Math.abs(lx2-lx1),Math.abs(ly2-ly1));
+    ctx.fillStyle='rgba(77,150,255,.08)';
+    ctx.fillRect(Math.min(lx1,lx2),Math.min(ly1,ly2),Math.abs(lx2-lx1),Math.abs(ly2-ly1));
+    ctx.setLineDash([]);
+  }
+
+  // UI state
+  const has=shapes.length>0;
+  document.getElementById('hint2d').style.opacity=has?'0':'0.15';
+  document.getElementById('tab3d').disabled=!has;
+  const _s=document.getElementById('hdr-stl');if(_s)_s.style.opacity=has?'1':'.45';
+}
+
+function drawHandles(s){
+  if(s.type==='freehand') syncFhMeta(s);
+  const isFh=s.type==='freehand';
+  const hw=s.w/2+10, hh=s.h/2+10;
+  // z = compensação de zoom para handles em screen space (tamanho fixo no ecrã)
+  const z=vpZoom;
+  ctx.save();
+  ctx.translate(s.x,s.y);
+  if(!isFh) ctx.rotate(s.rot);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  // bounding box
+  ctx.setLineDash([5/z,4/z]); ctx.strokeStyle='#ffffff66'; ctx.lineWidth=1.5/z;
+  ctx.strokeRect(-hw,-hh,hw*2,hh*2); ctx.setLineDash([]);
+  if(!isFh){
+    // corner handles (raio 12px screen)
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([cx,cy])=>{
+      ctx.beginPath(); ctx.arc(cx*hw,cy*hh,12/z,0,Math.PI*2);
+      ctx.fillStyle='#fff'; ctx.strokeStyle='#4d96ff'; ctx.lineWidth=3/z;
+      ctx.fill(); ctx.stroke();
+    });
+    // deform handle em baixo
+    ctx.beginPath(); ctx.moveTo(0,hh); ctx.lineTo(0,hh+21/z);
+    ctx.strokeStyle='#ffffff66'; ctx.lineWidth=2/z; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,hh+33/z,15/z,0,Math.PI*2);
+    ctx.fillStyle='#4ecb71'; ctx.strokeStyle='#fff'; ctx.lineWidth=3/z;
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font=`bold ${19/z}px sans-serif`;
+    ctx.fillText('⤡',0,hh+33/z);
+  }
+  // rotate handle em cima
+  ctx.beginPath(); ctx.moveTo(0,-hh); ctx.lineTo(0,-hh-21/z);
+  ctx.strokeStyle='#ffffff66'; ctx.lineWidth=2/z; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,-hh-33/z,15/z,0,Math.PI*2);
+  ctx.fillStyle='#a259ff'; ctx.strokeStyle='#fff'; ctx.lineWidth=3/z;
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font=`${19/z}px sans-serif`;
+  ctx.fillText('↺',0,-hh-33/z);
+  ctx.restore();
+}
+
+// ── freehand bbox helpers ────────────────────────
+function fhBBox(s){
+  if(!s.fhPoints||!s.fhPoints.length) return{x:s.x||0,y:s.y||0,w:s.w||40,h:s.h||40};
+  const xs=s.fhPoints.map(p=>p.x),ys=s.fhPoints.map(p=>p.y);
+  const x0=Math.min(...xs),y0=Math.min(...ys),x1=Math.max(...xs),y1=Math.max(...ys);
+  return{x:(x0+x1)/2,y:(y0+y1)/2,w:Math.max(x1-x0,10),h:Math.max(y1-y0,10)};
+}
+function syncFhMeta(s){
+  if(s.type!=='freehand'||!s.fhPoints)return;
+  const b=fhBBox(s);s.x=b.x;s.y=b.y;s.w=b.w;s.h=b.h;
+}
+
+// ── hit testing ──────────────────────────────────
+function ptInShape(s,px,py){
+  if(s.type==='freehand'){
+    if(!s.fhPoints||!s.fhPoints.length)return false;
+    const xs=s.fhPoints.map(p=>p.x),ys=s.fhPoints.map(p=>p.y);
+    return px>=Math.min(...xs)-10&&px<=Math.max(...xs)+10&&
+           py>=Math.min(...ys)-10&&py<=Math.max(...ys)+10;
+  }
+  const dx=px-s.x,dy=py-s.y;
+  const cos=Math.cos(-s.rot),sin=Math.sin(-s.rot);
+  const lx=dx*cos-dy*sin,ly=dx*sin+dy*cos;
+  return Math.abs(lx)<=s.w/2+8&&Math.abs(ly)<=s.h/2+8;
+}
+
+function getHandleAt(s,px,py){
+  if(!s) return null;
+  if(s.type==='freehand') syncFhMeta(s);
+  const hw=s.w/2+10, hh=s.h/2+10;
+  const dx=px-s.x, dy=py-s.y;
+  // freehand: rot=0, coords locais = canvas coords offset por (s.x,s.y)
+  const rot = s.type==='freehand' ? 0 : s.rot;
+  const cos=Math.cos(-rot), sin=Math.sin(-rot);
+  const lx=dx*cos-dy*sin, ly=dx*sin+dy*cos;
+  // rotate handle — topo-centro, fora da bbox (sempre disponível)
+  // offsets em world coords = screen_offset / vpZoom
+  const hOff=33/vpZoom;
+  if(Math.hypot(lx, ly+hh+hOff)<18/vpZoom) return 'rotate';
+  if(s.type!=='freehand'){
+    if(Math.hypot(lx, ly-hh-hOff)<18/vpZoom) return 'deform';
+    for(const [cx,cy] of [[-1,-1],[1,-1],[1,1],[-1,1]])
+      if(Math.hypot(lx-cx*hw, ly-cy*hh)<14) return 'scale';
+  }
+  return null;
+}
+
+// shapes in lasso rect
+function shapesInLasso(x1,y1,x2,y2){
+  const rx=Math.min(x1,x2),ry=Math.min(y1,y2),rw=Math.abs(x2-x1),rh=Math.abs(y2-y1);
+  return shapes.filter(s=>{
+    const cx=s.type==='freehand'?(s.fhPoints?s.fhPoints.reduce((a,p)=>a+p.x,0)/s.fhPoints.length:0):s.x;
+    const cy=s.type==='freehand'?(s.fhPoints?s.fhPoints.reduce((a,p)=>a+p.y,0)/s.fhPoints.length:0):s.y;
+    return cx>=rx&&cx<=rx+rw&&cy>=ry&&cy<=ry+rh;
+  });
+}
+
+function canvasXY(e){
+  const r=canvas.getBoundingClientRect();
+  const src=e.touches?e.touches[0]:e;
+  const sx=src.clientX-r.left, sy=src.clientY-r.top;
+  // converter screen → world (inverter pan + zoom)
+  return{x:(sx-vpPanX)/vpZoom, y:(sy-vpPanY)/vpZoom};
+}
+// screen coords sem inverter vp (para handles que são em screen space)
+function screenXY(e){
+  const r=canvas.getBoundingClientRect();
+  const src=e.touches?e.touches[0]:e;
+  return{x:src.clientX-r.left,y:src.clientY-r.top};
+}
+
+// ── POINTER EVENTS ───────────────────────────────
+canvas.addEventListener('pointerdown',onDown,{passive:false});
+canvas.addEventListener('pointermove',onMove,{passive:false});
+canvas.addEventListener('pointerup',  onUp,  false);
+canvas.addEventListener('pointerleave',onUp, false);
+
+// ── Zoom com scroll ──────────────────────────────────────────────
+canvas.addEventListener('wheel', e=>{
+  if(mode!=='2d'){e.preventDefault();return;}
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top; // screen pivot
+  const factor = e.deltaY < 0 ? 1.12 : 1/1.12;
+  const newZoom = Math.max(0.1, Math.min(10, vpZoom*factor));
+  // ajustar pan para que o ponto sob o cursor fique fixo
+  vpPanX = mx - (mx-vpPanX) * (newZoom/vpZoom);
+  vpPanY = my - (my-vpPanY) * (newZoom/vpZoom);
+  vpZoom = newZoom;
+  document.getElementById('zoom-val').textContent = Math.round(vpZoom*100)+'%';
+  redraw();
+},{passive:false});
+
+// ── Pan com space+drag ou botão do meio ──────────────────────────
+window.addEventListener('keydown', e=>{ if(e.code==='Space'&&mode==='2d'){e.preventDefault();spaceDown=true;canvas.style.cursor='grab';}});
+window.addEventListener('keyup',   e=>{ if(e.code==='Space'){spaceDown=false;canvas.style.cursor=activeTool==='erase'?'crosshair':'default';}});
+
+canvas.addEventListener('pointerdown', e=>{
+  if(spaceDown||e.button===1){
+    e.preventDefault();
+    panning=true; panStartX=e.clientX; panStartY=e.clientY;
+    panOrigX=vpPanX; panOrigY=vpPanY;
+    canvas.style.cursor='grabbing';
+    canvas.setPointerCapture(e.pointerId);
+  }
+},{passive:false});
+
+canvas.addEventListener('pointermove', e=>{
+  if(!panning)return;
+  vpPanX=panOrigX+(e.clientX-panStartX);
+  vpPanY=panOrigY+(e.clientY-panStartY);
+  document.getElementById('zoom-val').textContent = Math.round(vpZoom*100)+'%';
+  redraw();
+},{passive:false});
+
+['pointerup','pointerleave'].forEach(ev=>canvas.addEventListener(ev, e=>{
+  if(panning){panning=false;canvas.style.cursor=spaceDown?'grab':'default';}
+}));
+
+function onDown(e){
+  if(mode!=='2d')return;
+  e.preventDefault();
+  const{x,y}=canvasXY(e);
+
+  // FREEHAND
+  if(activeTool==='freehand'){
+    fhDrawing=true;fhCurrent=[{x,y}];
+    canvas.setPointerCapture(e.pointerId);return;
+  }
+
+  // ERASE
+  if(activeTool==='erase'){
+    for(let i=shapes.length-1;i>=0;i--){
+      if(ptInShape(shapes[i],x,y)){
+        pushUndo();shapes.splice(i,1);
+        selectedIds.clear();redraw();updateAchs();return;
+      }
+    }
+    return;
+  }
+
+  // DUPLICATE
+  if(activeTool==='duplicate'){
+    for(let i=shapes.length-1;i>=0;i--){
+      if(ptInShape(shapes[i],x,y)){
+        pushUndo();
+        const src=shapes[i];
+        const clone=JSON.parse(JSON.stringify(src));
+        clone.id=nextId++;
+        // offset: 24px right + 24px down in canvas space
+        const offset=Math.max(24, Math.min(src.w||40, src.h||40)*0.35);
+        if(clone.type==='freehand'&&clone.fhPoints){
+          clone.fhPoints=clone.fhPoints.map(p=>({x:p.x+offset,y:p.y+offset}));
+        } else {
+          clone.x+=offset; clone.y+=offset;
+        }
+        shapes.push(clone);
+        selectedIds=new Set([clone.id]);
+        redraw();updateAchs();return;
+      }
+    }
+    return;
+  }
+
+  // SELECT
+  // 0. group handles (multi-select)
+  if(selectedIds.size>1 && window._grpBounds){
+    const {bx,by,bw,bh,cx,cy}=window._grpBounds;
+    // rotate handle: top-centre stem
+    if(Math.hypot(x-cx,y-(by-22))<14){
+      pushUndo();
+      const initAngle=Math.atan2(y-cy,x-cx);
+      groupXform={dragMode:'grotate',startX:x,startY:y,cx,cy,initAngle,origShapes:snapshot()};
+      canvas.setPointerCapture(e.pointerId);return;
+    }
+    // deform handle: bottom-centre stem
+    if(Math.hypot(x-cx,y-(by+bh+22))<14){
+      pushUndo();
+      groupXform={dragMode:'gdeform',startX:x,startY:y,cx,cy,origShapes:snapshot()};
+      canvas.setPointerCapture(e.pointerId);return;
+    }
+    // inside bbox = gmove
+    if(x>=bx&&x<=bx+bw&&y>=by&&y<=by+bh){
+      pushUndo();
+      groupXform={dragMode:'gmove',startX:x,startY:y,cx,cy,origShapes:snapshot()};
+      canvas.setPointerCapture(e.pointerId);return;
+    }
+  }
+
+  // 1. check handle on a single-selected shape
+  if(selectedIds.size===1){
+    const sel=shapes.find(s=>s.id===[...selectedIds][0]);
+    if(sel){
+      const h=getHandleAt(sel,x,y);
+      if(h){
+        if(h==='rotate'){
+          if(e.shiftKey){
+            // shift+rotate → drag livre
+            pushUndo();
+            drag={mode:'rotate',startX:x,startY:y,origShapes:snapshot()};
+            canvas.setPointerCapture(e.pointerId);return;
+          }
+          // clique simples → 45° fixos
+          pushUndo();
+          const STEP=Math.PI/4;
+          if(sel.type==='freehand'&&sel.fhPoints){
+            syncFhMeta(sel);
+            const rcx=sel.x,rcy=sel.y;
+            const rc=Math.cos(STEP),rs=Math.sin(STEP);
+            sel.fhPoints=sel.fhPoints.map(p=>({
+              x:rcx+(p.x-rcx)*rc-(p.y-rcy)*rs,
+              y:rcy+(p.x-rcx)*rs+(p.y-rcy)*rc,
+            }));
+            syncFhMeta(sel);
+          } else {
+            sel.rot=(sel.rot||0)+STEP;
+          }
+          unlockAch('rotate');
+          redraw();return;
+        }
+        pushUndo();
+        drag={mode:h,startX:x,startY:y,origShapes:snapshot()};
+        canvas.setPointerCapture(e.pointerId);return;
+      }
+    }
+  }
+
+  // 2. click on a shape?
+  let hit=null;
+  for(let i=shapes.length-1;i>=0;i--){
+    if(ptInShape(shapes[i],x,y)){hit=shapes[i];break;}
+  }
+
+  if(hit){
+    if(e.shiftKey){
+      // shift+click: toggle shape in/out of selection
+      if(selectedIds.has(hit.id)) selectedIds.delete(hit.id);
+      else selectedIds.add(hit.id);
+      redraw();return;
+    }
+    if(!selectedIds.has(hit.id)){
+      // plain click: replace selection
+      selectedIds=new Set([hit.id]);
+    }
+    pushUndo();
+    drag={mode:'move',startX:x,startY:y,origShapes:snapshot()};
+    canvas.setPointerCapture(e.pointerId);
+    redraw();return;
+  }
+
+  // 3. empty space → start lasso
+  selectedIds.clear();
+  lasso={x1:x,y1:y,x2:x,y2:y};
+  canvas.setPointerCapture(e.pointerId);
+  redraw();
+}
+
+function onMove(e){
+  if(mode!=='2d')return;
+  e.preventDefault();
+  const{x,y}=canvasXY(e);
+
+  // freehand cursor
+  const cur=document.getElementById('fh-cursor');
+  if(activeTool==='freehand'){
+    const sc=screenXY(e); // screen coords para posicionar o cursor CSS
+    cur.style.display='block';cur.style.left=sc.x+'px';cur.style.top=sc.y+'px';
+    cur.style.width=cur.style.height='20px';
+    if(fhDrawing){fhCurrent.push({x,y});redraw();} // x,y são world coords
+    return;
+  }
+  cur.style.display='none';
+
+  // group xform
+  if(groupXform){
+    const {dragMode,cx,cy,origShapes}=groupXform;
+    const selList=shapes.filter(s=>selectedIds.has(s.id));
+    if(dragMode==='gmove'){
+      const dx=x-groupXform.startX,dy=y-groupXform.startY;
+      selList.forEach(s=>{
+        const o=origShapes.find(o=>o.id===s.id);
+        if(!o)return;
+        if(s.type==='freehand'&&o.fhPoints){
+          s.fhPoints=o.fhPoints.map(p=>({x:p.x+dx,y:p.y+dy}));
+        } else {
+          s.x=o.x+dx;s.y=o.y+dy;
+        }
+      });
+    } else if(dragMode==='gscale'){
+      const dist=Math.hypot(x-cx,y-cy);
+      const ratio=Math.max(0.1,dist/(groupXform.initDist||1));
+      selList.forEach(s=>{
+        const o=origShapes.find(o=>o.id===s.id);
+        if(!o)return;
+        if(s.type==='freehand'&&o.fhPoints){
+          s.fhPoints=o.fhPoints.map(p=>({x:cx+(p.x-cx)*ratio,y:cy+(p.y-cy)*ratio}));
+        } else {
+          s.w=Math.max(10,o.w*ratio);s.h=Math.max(10,o.h*ratio);
+          s.x=cx+(o.x-cx)*ratio;s.y=cy+(o.y-cy)*ratio;
+        }
+      });
+      unlockAch('scale');
+    } else if(dragMode==='grotate'){
+      const angle=Math.atan2(y-cy,x-cx);
+      const delta=angle-groupXform.initAngle;
+      const cosd=Math.cos(delta),sind=Math.sin(delta);
+      selList.forEach(s=>{
+        const o=origShapes.find(o=>o.id===s.id);
+        if(!o)return;
+        if(s.type==='freehand'&&o.fhPoints){
+          s.fhPoints=o.fhPoints.map(p=>{
+            const pdx=p.x-cx,pdy=p.y-cy;
+            return{x:cx+pdx*cosd-pdy*sind,y:cy+pdx*sind+pdy*cosd};
+          });
+        } else {
+          s.rot=(o.rot||0)+delta;
+          const dx=o.x-cx,dy=o.y-cy;
+          s.x=cx+dx*cosd-dy*sind;s.y=cy+dx*sind+dy*cosd;
+        }
+      });
+      unlockAch('rotate');
+    } else if(dragMode==='gdeform'){
+      // deform all selected shapes: X drag → width ratio, Y drag → height ratio
+      const dx2=x-groupXform.startX, dy2=y-groupXform.startY;
+      // compute reference size of group bbox to derive ratios
+      const {bw,bh}=window._grpBounds||{bw:200,bh:200};
+      const rw=Math.max(0.1, 1 + dx2/(bw||200));
+      const rh=Math.max(0.1, 1 + dy2/(bh||200));
+      selList.forEach(s=>{
+        const o=origShapes.find(o=>o.id===s.id);
+        if(!o)return;
+        if(s.type==='freehand'&&o.fhPoints){
+          // scale fhPoints around their own centroid
+          const ocx=o.fhPoints.reduce((a,p)=>a+p.x,0)/o.fhPoints.length;
+          const ocy=o.fhPoints.reduce((a,p)=>a+p.y,0)/o.fhPoints.length;
+          s.fhPoints=o.fhPoints.map(p=>({
+            x:ocx+(p.x-ocx)*rw,
+            y:ocy+(p.y-ocy)*rh,
+          }));
+        } else {
+          s.w=Math.max(10,o.w*rw);
+          s.h=Math.max(10,o.h*rh);
+        }
+      });
+      unlockAch('scale');
+    }
+    redraw();return;
+  }
+
+  // lasso update
+  if(lasso){
+    lasso.x2=x;lasso.y2=y;
+    // live highlight
+    const inside=shapesInLasso(lasso.x1,lasso.y1,x,y);
+    selectedIds=new Set(inside.map(s=>s.id));
+    redraw();return;
+  }
+
+  // drag shapes or handle
+  if(!drag)return;
+  const dx=x-drag.startX,dy=y-drag.startY;
+  const orig=drag.origShapes;
+
+  if(drag.mode==='move'){
+    selectedIds.forEach(id=>{
+      const s=shapes.find(s=>s.id===id);
+      const o=orig.find(o=>o.id===id);
+      if(!s||!o)return;
+      if(s.type==='freehand'&&o.fhPoints){
+        // snap: arredondar o offset total
+        const sdx=snapV(o.x+dx)-o.x, sdy=snapV(o.y+dy)-o.y;
+        s.fhPoints=o.fhPoints.map(p=>({x:p.x+sdx,y:p.y+sdy}));
+        syncFhMeta(s);
+      } else {
+        s.x=snapV(o.x+dx); s.y=snapV(o.y+dy);
+      }
+    });
+  } else {
+    // scale/rotate only for single selection
+    const id=[...selectedIds][0];
+    const s=shapes.find(s=>s.id===id);
+    const o=orig.find(o=>o.id===id);
+    if(!s||!o)return;
+    if(drag.mode==='scale'){
+      const dist=Math.hypot(x-s.x,y-s.y);
+      const base=Math.hypot(drag.startX-o.x,drag.startY-o.y);
+      const ratio=Math.max(.2,dist/(base||1));
+      s.w=Math.max(20,o.w*ratio);s.h=Math.max(20,o.h*ratio);
+      unlockAch('scale');
+    } else if(drag.mode==='deform'){
+      // deform: X drag → width, Y drag → height, independent
+      const cos=Math.cos(-s.rot),sin=Math.sin(-s.rot);
+      const rdx=dx*cos-dy*sin, rdy=dx*sin+dy*cos;
+      s.w=Math.max(20,o.w+rdx*2);
+      s.h=Math.max(20,o.h+rdy*2);
+      unlockAch('scale');
+    } else if(drag.mode==='rotate'){
+      // drag livre de rotate (shift+rotate)
+      if(s.type==='freehand'&&o.fhPoints){
+        const angle=Math.atan2(y-o.y,x-o.x)+Math.PI/2;
+        const initAngle=Math.atan2(drag.startY-o.y,drag.startX-o.x)+Math.PI/2;
+        const delta=angle-initAngle;
+        const cos=Math.cos(delta),sin=Math.sin(delta);
+        s.fhPoints=o.fhPoints.map(p=>({
+          x:o.x+(p.x-o.x)*cos-(p.y-o.y)*sin,
+          y:o.y+(p.x-o.x)*sin+(p.y-o.y)*cos,
+        }));
+        syncFhMeta(s);
+      } else {
+        s.rot=Math.atan2(y-s.y,x-s.x)+Math.PI/2;
+      }
+      unlockAch('rotate');
+    }
+  }
+  redraw();
+}
+
+function onUp(e){
+  // finish lasso
+  if(lasso){
+    const inside=shapesInLasso(lasso.x1,lasso.y1,lasso.x2,lasso.y2);
+    selectedIds=new Set(inside.map(s=>s.id));
+    if(selectedIds.size>1) unlockAch('multi');
+    lasso=null;redraw();
+    try{if(e)canvas.releasePointerCapture(e.pointerId);}catch(_){}
+    return;
+  }
+  // finish freehand
+  if(fhDrawing&&fhCurrent.length>4){
+    pushUndo();
+    const simplified=rdp(fhCurrent,3);
+    const cd=COLOR_DEFS.find(c=>c.hex===activeColor)||COLOR_DEFS[0];
+    shapes.push({
+      id:nextId++,type:'freehand',
+      x:0,y:0,w:0,h:0,rot:0,
+      color:activeColor,
+      fhPoints:simplified,
+      zMm:(COLOR_DEFS.find(cd=>cd.hex===activeColor)||{z:Z_FREEHAND}).z||Z_FREEHAND,
+    });
+    selectedIds.clear();
+    unlockAch('freehand');
+    if(activeColor===HOLE_COLOR)unlockAch('hole');
+    updateAchs();
+  }
+  fhDrawing=false;fhCurrent=[];
+  drag=null;
+  groupXform=null;
+  try{if(e)canvas.releasePointerCapture(e.pointerId);}catch(_){}
+  redraw();
+}
+
+// ── RDP ─────────────────────────────────────────
+function perp(pt,a,b){
+  const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;
+  if(!l)return Math.hypot(pt.x-a.x,pt.y-a.y);
+  const t=Math.max(0,Math.min(1,((pt.x-a.x)*dx+(pt.y-a.y)*dy)/l));
+  return Math.hypot(pt.x-(a.x+t*dx),pt.y-(a.y+t*dy));
+}
+function rdp(pts,eps){
+  if(pts.length<=2)return pts;
+  let maxD=0,idx=0;
+  for(let i=1;i<pts.length-1;i++){const d=perp(pts[i],pts[0],pts[pts.length-1]);if(d>maxD){maxD=d;idx=i;}}
+  if(maxD>eps){const l=rdp(pts.slice(0,idx+1),eps),r=rdp(pts.slice(idx),eps);return[...l.slice(0,-1),...r];}
+  return[pts[0],pts[pts.length-1]];
+}
+
+function updateAchs(){
+  if(shapes.length>=5)unlockAch('shapes5');
+}
+
+// ═══════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════
+function setMode(m){
+  mode=m;
+  canvas.style.display                              =m==='2d'?'block':'none';
+  document.getElementById('hint2d').style.display  =m==='2d'?'flex':'none';
+  document.getElementById('three-mount').style.display=m==='3d'?'block':'none';
+  document.getElementById('tab2d').classList.toggle('active',m==='2d');
+  document.getElementById('tab3d').classList.toggle('active',m==='3d');
+  document.getElementById('fh-cursor').style.display='none';
+  document.getElementById('hole-badge').style.display='none';
+  if(m==='3d'){buildMesh3D();unlockAch('view3d');}
+  else redraw();
+}
+
+// ═══════════════════════════════════════
+// THREE.JS
+// ═══════════════════════════════════════
+const mount3=document.getElementById('three-mount');
+const renderer3=new THREE.WebGLRenderer({antialias:true});
+renderer3.setClearColor(0x0f1022,1);
+renderer3.setPixelRatio(Math.min(devicePixelRatio,2));
+mount3.appendChild(renderer3.domElement);
+
+const scene3=new THREE.Scene();
+const camera3=new THREE.PerspectiveCamera(45,1,.1,5000);
+scene3.add(new THREE.AmbientLight(0xffffff,.7));
+const sun3=new THREE.DirectionalLight(0xffffff,1.2);sun3.position.set(80,120,100);scene3.add(sun3);
+const fill3=new THREE.DirectionalLight(0x8899ff,.45);fill3.position.set(-80,-60,60);scene3.add(fill3);
+const grid3=new THREE.GridHelper(600,30,0x334466,0x1e2744);scene3.add(grid3);
+
+let mesh3=null;
+let theta3=0.4,phi3=0.75,radius3=400;
+const target3=new THREE.Vector3();
+function updateCam3(){
+  camera3.position.set(
+    target3.x+radius3*Math.sin(phi3)*Math.sin(theta3),
+    target3.y+radius3*Math.cos(phi3),
+    target3.z+radius3*Math.sin(phi3)*Math.cos(theta3));
+  camera3.lookAt(target3);
+}
+updateCam3();
+
+let orb={on:false,lx:0,ly:0};
+renderer3.domElement.addEventListener('pointerdown',e=>{orb={on:true,lx:e.clientX,ly:e.clientY};});
+renderer3.domElement.addEventListener('pointermove',e=>{
+  if(!orb.on)return;
+  theta3-=(e.clientX-orb.lx)*.007;
+  phi3=Math.max(.05,Math.min(Math.PI-.05,phi3-(e.clientY-orb.ly)*.007));
+  orb.lx=e.clientX;orb.ly=e.clientY;updateCam3();
+});
+renderer3.domElement.addEventListener('pointerup',()=>orb.on=false);
+renderer3.domElement.addEventListener('pointerleave',()=>orb.on=false);
+renderer3.domElement.addEventListener('wheel',e=>{
+  radius3=Math.max(60,Math.min(1500,radius3+e.deltaY*.4));updateCam3();e.preventDefault();
+},{passive:false});
+
+function resizeR3(){
+  const w=mount3.clientWidth,h=mount3.clientHeight;
+  if(!w||!h)return;
+  renderer3.setSize(w,h,false);camera3.aspect=w/h;camera3.updateProjectionMatrix();
+}
+(function anim3(){requestAnimationFrame(anim3);resizeR3();renderer3.render(scene3,camera3);})();
+
+// ── Canvas coords → Clipper integer path (scale ×1000 for precision) ────
+const CP_SCALE = 1000;
+function shapeToClipper(s) {
+  const pts = [], hw = s.w/2, hh = s.h/2;
+  const cos = Math.cos(s.rot), sin = Math.sin(s.rot);
+  function push(lx, ly) {
+    const wx = s.x + lx*cos - ly*sin;
+    const wy = s.y + lx*sin + ly*cos;
+    pts.push({ X: Math.round(wx * CP_SCALE), Y: Math.round(wy * CP_SCALE) });
+  }
+  switch (s.type) {
+    case 'rect': push(-hw,-hh);push(hw,-hh);push(hw,hh);push(-hw,hh); break;
+    case 'circle':
+      for(let i=0;i<64;i++){const a=i/64*Math.PI*2;push(Math.cos(a)*hw,Math.sin(a)*hh);} break;
+    case 'triangle': push(0,-hh);push(hw,hh);push(-hw,hh); break;
+    case 'star': {
+      const sp=5;
+      for(let i=0;i<sp*2;i++){const r=i%2===0?hw:hw*.42,a=i*Math.PI/sp-Math.PI/2;push(Math.cos(a)*r,Math.sin(a)*r);}
+      break;
+    }
+    case 'heart':
+      for(let i=0;i<60;i++){const t=i/60*Math.PI*2;
+        push(hw*.8*Math.pow(Math.sin(t),3),
+             -hh*(.8125*Math.cos(t)-.3125*Math.cos(2*t)-.125*Math.cos(3*t)-.0625*Math.cos(4*t)));} break;
+    case 'hex':
+      for(let i=0;i<6;i++){const a=i*Math.PI/3-Math.PI/6;push(Math.cos(a)*hw,Math.sin(a)*hh);} break;
+    case 'arrow': {
+      const bw=hw*.55,bh=hh*.45;
+      [[-hw,-bh],[0,-bh],[0,-hh],[hw,0],[0,hh],[0,bh],[-hw,bh]].forEach(([x,y])=>push(x,y)); break;
+    }
+    case 'para': {
+      const sh=hw*0.45;
+      [[-hw+sh,-hh],[hw+sh,-hh],[hw-sh,hh],[-hw-sh,hh]].forEach(([x,y])=>push(x,y)); break;
+    }
+    case 'freehand':
+      if (s.fhPoints) s.fhPoints.forEach(p=>pts.push({X:Math.round(p.x*CP_SCALE),Y:Math.round(p.y*CP_SCALE)}));
+      break;
+  }
+  return pts;
+}
+
+// Clipper path → THREE.Shape (scene coords: canvas→scene, Y flipped)
+function clipperToThreeShape(path, cw, ch) {
+  if (!path || path.length < 3) return null;
+  const v2s = path.map(p => new THREE.Vector2(
+    p.X / CP_SCALE - cw/2,
+    -(p.Y / CP_SCALE - ch/2)
+  ));
+  return new THREE.Shape(v2s);
+}
+
+// Boolean difference: subject[] minus clips[] → array of result paths
+function clipperDiff(subjectPaths, clipPaths) {
+  if (!window.ClipperLib) return subjectPaths.map(p=>[p]);
+  const cpr = new ClipperLib.Clipper();
+  cpr.AddPaths(subjectPaths, ClipperLib.PolyType.ptSubject, true);
+  cpr.AddPaths(clipPaths,    ClipperLib.PolyType.ptClip,    true);
+  const solution = new ClipperLib.Paths();
+  cpr.Execute(ClipperLib.ClipType.ctDifference, solution,
+    ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+  return solution; // array of paths (some may be holes in clipper's winding sense)
+}
+
+function buildMesh3D() {
+  if (mesh3) { scene3.remove(mesh3); mesh3 = null; }
+  const group  = new THREE.Group();
+  const cw     = canvas.width  || 800;
+  const ch     = canvas.height || 600;
+  const sc     = Math.min(cw, ch);
+
+  const normals = shapes.filter(s => s.color !== HOLE_COLOR);
+  const holes   = shapes.filter(s => s.color === HOLE_COLOR);
+
+  // Pre-build all hole clipper paths once
+  const holePaths = holes.map(h => shapeToClipper(h)).filter(p => p.length >= 3);
+
+  normals.forEach(s => {
+    const subjPath = shapeToClipper(s);
+    if (subjPath.length < 3) return;
+
+    // Garantir winding CCW (área >= 0) para o subject antes do diff
+    if (ClipperLib && ClipperLib.Clipper) {
+      const sArea = ClipperLib.Clipper.Area(subjPath);
+      if (sArea < 0) subjPath.reverse();
+    }
+
+    // Boolean difference: cut all holes from this shape
+    let resultPaths;
+    if (holePaths.length > 0 && window.ClipperLib) {
+      resultPaths = clipperDiff([subjPath], holePaths);
+    } else {
+      resultPaths = [subjPath];
+    }
+
+    if (!resultPaths || !resultPaths.length) return;
+
+    // Clipper.Area > 0 = CCW = outer contour
+    // Clipper.Area < 0 = CW  = inner hole
+    const outers = [], inners = [];
+    resultPaths.forEach(p => {
+      if (!p || p.length < 3) return;
+      const area = (ClipperLib && ClipperLib.Clipper) ? ClipperLib.Clipper.Area(p) : 1;
+      if (area >= 0) outers.push(p);
+      else           inners.push(p);
+    });
+
+    if (!window.ClipperLib) outers.push(...resultPaths);
+
+    outers.forEach(outer => {
+      const threeShape = clipperToThreeShape(outer, cw, ch);
+      if (!threeShape) return;
+
+      // Attach inner rings as holes in the THREE.Shape
+      inners.forEach(inner => {
+        const hp = inner.map(p => new THREE.Vector2(
+          p.X / CP_SCALE - cw/2,
+          -(p.Y / CP_SCALE - ch/2)
+        ));
+        threeShape.holes.push(new THREE.Path(hp));
+      });
+
+      // derive Z from current colour (so recolouring updates height)
+      const _cd = COLOR_DEFS.find(c=>c.hex===s.color);
+      const _zMm = s.zMm || (_cd && !_cd.hole ? _cd.z : 1);
+      // 1 unidade Three.js = 1px canvas = 1mm no STL — usar zMm directamente
+      const geo = new THREE.ExtrudeGeometry(threeShape, {
+        depth:          _zMm,
+        bevelEnabled:   true,
+        bevelThickness: 0.3,
+        bevelSize:      0.3,
+        bevelSegments:  2,
+      });
+      const mat = new THREE.MeshPhongMaterial({
+        color:    new THREE.Color(s.color),
+        specular: new THREE.Color(0x222222),
+        shininess: 60,
+        side: THREE.DoubleSide,
+      });
+      group.add(new THREE.Mesh(geo, mat));
+    });
+  });
+
+  if (!group.children.length) { scene3.add(group); mesh3 = group; return; }
+
+  const box = new THREE.Box3().setFromObject(group);
+  const ctr = new THREE.Vector3(); box.getCenter(ctr);
+  group.children.forEach(c => c.position.sub(ctr));
+  const sz = new THREE.Vector3(); box.getSize(sz);
+  grid3.position.y = -(sz.y / 2 + 4);
+  radius3 = Math.max(...sz.toArray()) * 2.2;
+  updateCam3();
+  scene3.add(group); mesh3 = group;
+}
+
+// ═══════════════════════════════════════
+// STL EXPORT
+// ═══════════════════════════════════════
+// ══════════════════════════════════════════════
+// VIEWPORT CONTROLS
+// ══════════════════════════════════════════════
+function fitAll(){
+  if(!shapes.length){ vpZoom=1;vpPanX=0;vpPanY=0;redraw();return;}
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  shapes.forEach(s=>{
+    const pts=s.fhPoints||[{x:s.x-s.w/2,y:s.y-s.h/2},{x:s.x+s.w/2,y:s.y+s.h/2}];
+    pts.forEach(p=>{minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y);});
+  });
+  const pad=60;
+  const bw=maxX-minX+pad*2, bh=maxY-minY+pad*2;
+  const cw=canvas.width,     ch=canvas.height;
+  vpZoom=Math.min(cw/bw, ch/bh, 4);
+  vpPanX=(cw-(maxX+minX)*vpZoom)/2;
+  vpPanY=(ch-(maxY+minY)*vpZoom)/2;
+  document.getElementById('zoom-val').textContent=Math.round(vpZoom*100)+'%';
+  redraw();
+}
+
+function resetView(){
+  vpZoom=1;vpPanX=0;vpPanY=0;
+  document.getElementById('zoom-val').textContent='100%';
+  redraw();
+}
+
+// ══════════════════════════════════════════════
+// SAVE / LOAD
+// ══════════════════════════════════════════════
+function saveJSON(){
+  const data={version:1,nextId,shapes:shapes.map(s=>({
+    id:s.id,type:s.type,x:s.x,y:s.y,w:s.w,h:s.h,
+    rot:s.rot,color:s.color,zMm:s.zMm,
+    fhPoints:s.fhPoints||null
+  }))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='monco.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('📥 Guardado como monco.json');
+}
+
+function loadJSON(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!Array.isArray(data.shapes))throw new Error('Formato inválido');
+      pushUndo();
+      shapes=data.shapes.map(s=>({...s,fhPoints:s.fhPoints||undefined}));
+      nextId=data.nextId||(Math.max(0,...shapes.map(s=>s.id))+1);
+      selectedIds.clear();lasso=null;groupXform=null;
+      redraw();updateAchs();
+      showToast('📤 Composição carregada — '+shapes.length+' formas');
+    }catch(err){showToast('⚠️ Erro: '+err.message);}
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function downloadSTL(){
+  if(!mesh3)return;
+  const pos=[];
+  mesh3.traverse(c=>{
+    if(!c.isMesh)return;
+    const g=c.geometry.clone();
+    if(g.index)g.toNonIndexed();
+    const p=g.attributes.position;
+    for(let i=0;i<p.count;i++)pos.push(p.getX(i),p.getY(i),p.getZ(i));
+  });
+  const tri=pos.length/9;
+  const buf=new ArrayBuffer(84+tri*50);
+  const dv=new DataView(buf);
+  const hdr='Monco3D';for(let i=0;i<hdr.length;i++)dv.setUint8(i,hdr.charCodeAt(i));
+  dv.setUint32(80,tri,true);
+  let off=84;
+  for(let t=0;t<tri;t++){
+    const b=t*9;
+    const ax=pos[b],ay=pos[b+1],az=pos[b+2],bx=pos[b+3],by=pos[b+4],bz=pos[b+5],cx=pos[b+6],cy=pos[b+7],cz=pos[b+8];
+    const ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az;
+    const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,nl=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    [nx/nl,ny/nl,nz/nl,ax,ay,az,bx,by,bz,cx,cy,cz].forEach(v=>{dv.setFloat32(off,v,true);off+=4;});
+    dv.setUint16(off,0,true);off+=2;
+  }
+  const blob=new Blob([buf],{type:'application/octet-stream'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const _ts=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  a.href=url;a.download='monco_'+_ts+'.stl';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  unlockAch('stl');showToast('💾 STL guardado! Abre no Cura para imprimir.');
+}
+
+// ═══════════════════════════════════════
+// TOAST / CERT
+// ═══════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+function openCert(){
+  document.getElementById('cert-modal').classList.add('open');
+  // score
+  document.getElementById('cert-score-show').textContent=score;
+  // star SVGs
+  const starCount=score>=100?3:score>=50?2:score>=20?1:0;
+  const starRow=document.getElementById('cert-stars-row');
+  starRow.innerHTML='';
+  for(let i=0;i<3;i++){
+    const lit=i<starCount;
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('class','cert-star-svg '+(lit?'lit':'dim'));
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d','M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z');
+    svg.appendChild(p);starRow.appendChild(svg);
+  }
+  // name
+  const ni=document.getElementById('cert-name-in');
+  document.getElementById('cert-name-show').textContent=ni.value||'—';
+  ni.oninput=()=>document.getElementById('cert-name-show').textContent=ni.value||'—';
+  // achievements
+  const c=document.getElementById('cert-achs-show');c.innerHTML='';
+  ACHS.filter(a=>a.done).forEach(a=>{
+    const t=document.createElement('div');
+    t.className='cert-ach-tag done';
+    const dot=document.createElement('div');dot.className='dot';t.appendChild(dot);
+    t.appendChild(document.createTextNode(a.icon+' '+a.name));
+    c.appendChild(t);
+  });
+  // show locked ones dimly
+  ACHS.filter(a=>!a.done).forEach(a=>{
+    const t=document.createElement('div');
+    t.className='cert-ach-tag';
+    const dot=document.createElement('div');dot.className='dot';t.appendChild(dot);
+    t.appendChild(document.createTextNode(a.icon+' '+a.name));
+    c.appendChild(t);
+  });
+}
+function closeCert(){document.getElementById('cert-modal').classList.remove('open');}
+
+// ═══════════════════════════════════════
+// TANGRAM
+// ═══════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════
+// TANGRAM HANDLERS
+// ══════════════════════════════════════════════════════════════════
+const TGM_COLOR = '#ff4d4f'; // Ant red-5
+const TGM_Z     = 1;         // 1mm fixo para todas as peças tangram
+
+// Tamanhos canónicos das peças (em px, escalam com o canvas)
+// Base unit U = min(cw,ch)*0.13 — tri pequeno ocupa U×U
+// Cada tri. tangram é rectângulo isósceles: catetos = L, hypotenusa = L√2
+// fhPoints em coords absolutas calculadas no momento do clique.
+// Quadrado: tipo rect normal (não rotado). Para: tipo para.
+// makeTri(cx,cy,L,orient): 4 orientações do tri rectângulo
+//   'BL' = ângulo recto em Baixo-Esquerda  (L1)
+//   'BR' = ângulo recto em Baixo-Direita   (L2)
+//   'TL' = ângulo recto em Topo-Esquerda   
+//   'TR' = ângulo recto em Topo-Direita    
+function makeTri(cx, cy, L, orient) {
+  const h = L / 2;
+  switch(orient) {
+    case 'BL': return [{x:cx-h,y:cy+h},{x:cx+h,y:cy+h},{x:cx-h,y:cy-h}];
+    case 'BR': return [{x:cx-h,y:cy+h},{x:cx+h,y:cy+h},{x:cx+h,y:cy-h}];
+    case 'TL': return [{x:cx-h,y:cy-h},{x:cx+h,y:cy-h},{x:cx-h,y:cy+h}];
+    case 'TR': return [{x:cx-h,y:cy-h},{x:cx+h,y:cy-h},{x:cx+h,y:cy+h}];
+  }
+}
+function makePara(cx, cy, L) {
+  // paralelogramo: base 2L, altura L, inclinado L
+  const w = L, h = L/2;
+  return [{x:cx-w,y:cy+h},{x:cx,y:cy-h},{x:cx+w,y:cy-h},{x:cx,y:cy+h}];
+}
+
+const TGM_PIECE_FN = {
+  'tg-L1': (cx,cy,U) => makeTri(cx, cy, U*2, 'BL'),  // tri grande, ∟ baixo-esq
+  'tg-L2': (cx,cy,U) => makeTri(cx, cy, U*2, 'BR'),  // tri grande, ∟ baixo-dir
+  'tg-M':  (cx,cy,U) => makeTri(cx, cy, U*Math.SQRT2, 'BL'), // tri médio
+  'tg-S1': (cx,cy,U) => makeTri(cx, cy, U,   'BL'),  // tri pequeno, ∟ baixo-esq
+  'tg-S2': (cx,cy,U) => makeTri(cx, cy, U,   'BR'),  // tri pequeno, ∟ baixo-dir
+  'tg-SQ': null,   // quadrado: tipo rect normal
+  'tg-P':  null,   // paralelogramo: tipo para
+};
+
+document.querySelectorAll('[data-tangram]').forEach(btn => {
+  btn.onclick = () => {
+    if (mode !== '2d') return;
+    const key = btn.dataset.tangram;
+    resizeCanvas();
+    pushUndo();
+    const U  = Math.min(canvas.width, canvas.height) * 0.08;
+    const cx = canvas.width  / 2 + (Math.random() - .5) * 60;
+    const cy = canvas.height / 2 + (Math.random() - .5) * 60;
+    let s;
+    if (key === 'tg-SQ') {
+      // quadrado: rect com lado U, sem rotação
+      s = { id:nextId++, type:'rect', x:cx, y:cy,
+            w:U, h:U, rot:0, color:TGM_COLOR, zMm:TGM_Z };
+    } else if (key === 'tg-P') {
+      // paralelogramo: tipo para com w=2U, h=U
+      s = { id:nextId++, type:'para', x:cx, y:cy,
+            w:U*2, h:U, rot:0, color:TGM_COLOR, zMm:TGM_Z };
+    } else {
+      const fn = TGM_PIECE_FN[key];
+      if (!fn) return;
+      s = { id:nextId++, type:'freehand', x:0, y:0, w:0, h:0, rot:0,
+            color:TGM_COLOR, zMm:TGM_Z, fhPoints: fn(cx, cy, U) };
+    }
+    shapes.push(s);
+    selectedIds = new Set([s.id]);
+    redraw(); updateAchs();
+  };
+});
+
+function placeTangramCat() {
+  if (mode !== '2d') return;
+  resizeCanvas();
+  pushUndo();
+
+  // Coordenadas exactas derivadas do JSON do gato construído manualmente.
+  // Centrar no canvas: bbox do gato ≈ x:[204,447], y:[28,454] → centro≈(325,241)
+  // Offset: (cx-325, cy-241) onde cx,cy = centro do canvas em world coords
+  const wcx = (canvas.width  - vpPanX * 0) / vpZoom / 2 - vpPanX / vpZoom;
+  const wcy = (canvas.height - vpPanY * 0) / vpZoom / 2 - vpPanY / vpZoom;
+  // mais simples: centro do canvas em world coords
+  const cx = (canvas.width/2  - vpPanX) / vpZoom;
+  const cy = (canvas.height/2 - vpPanY) / vpZoom;
+  const dx = cx - 325.7, dy = cy - 241.2;
+
+  const pieces = [
+    // corpo esq (tri grande)
+    { type:'freehand', fhPoints:[{x:446.7+dx,y:332.2+dy},{x:327.2+dx,y:212.7+dy},{x:327.2+dx,y:451.7+dy}] },
+    // perna dir (tri grande)
+    { type:'freehand', fhPoints:[{x:204.2+dx,y:332.3+dy},{x:323.7+dx,y:451.8+dy},{x:323.7+dx,y:212.8+dy}] },
+    // cabeça (quadrado rotado)
+    { type:'rect',     x:326.7+dx, y:151.0+dy, w:84.5, h:84.5, rot:5.4978 },
+    // barriga (tri médio)
+    { type:'freehand', fhPoints:[{x:204.0+dx,y:453.5+dy},{x:323.5+dx,y:453.5+dy},{x:204.0+dx,y:334.0+dy}] },
+    // orelha dir (tri pequeno)
+    { type:'freehand', fhPoints:[{x:389.0+dx,y:28.1+dy},{x:329.3+dx,y:87.8+dy},{x:389.0+dx,y:147.6+dy}] },
+    // orelha esq (tri pequeno)
+    { type:'freehand', fhPoints:[{x:265.0+dx,y:147.9+dy},{x:324.7+dx,y:88.1+dy},{x:265.0+dx,y:28.4+dy}] },
+    // rabo (paralelogramo)
+    { type:'para',     x:85.1+dx,  y:394.8+dy, w:169,  h:84.5, rot:0.7854 },
+  ];
+
+  const newIds=[];
+  pieces.forEach(p=>{
+    const s={id:nextId++, x:p.x||0, y:p.y||0, w:p.w||0, h:p.h||0,
+             rot:p.rot||0, color:TGM_COLOR, zMm:TGM_Z,
+             type:p.type, fhPoints:p.fhPoints||null};
+    shapes.push(s); newIds.push(s.id);
+  });
+  selectedIds=new Set(newIds);
+  redraw(); updateAchs(); unlockAch('shapes5');
+}
+
+
+// ── Viewport bar buttons (após DOM ready) ────────────────
+function initVpBar(){
+  function updZoom(){
+    const pct=Math.round(vpZoom*100)+'%';
+    const el=document.getElementById('vpz-val');
+    if(el) el.textContent=pct;
+    // manter zoom-val do bot sincronizado se existir
+    const zv=document.getElementById('zoom-val');
+    if(zv) zv.textContent=pct;
+  }
+  function doZoom(factor){
+    const mx=canvas.width/2, my=canvas.height/2;
+    const nz=Math.max(0.1,Math.min(10,vpZoom*factor));
+    vpPanX=mx-(mx-vpPanX)*(nz/vpZoom);
+    vpPanY=my-(my-vpPanY)*(nz/vpZoom);
+    vpZoom=nz; updZoom(); redraw();
+  }
+  const zo=document.getElementById('vpz-out');
+  const zi=document.getElementById('vpz-in');
+  const zf=document.getElementById('vpz-fit');
+  const z1=document.getElementById('vpz-1');
+  const zsn=document.getElementById('vpz-snap');
+  const zgr=document.getElementById('vpz-grid');
+  if(zo) zo.onclick=()=>doZoom(1/1.25);
+  if(zi) zi.onclick=()=>doZoom(1.25);
+  if(zf) zf.onclick=()=>{fitAll();updZoom();};
+  if(z1) z1.onclick=()=>{resetView();updZoom();};
+  if(zsn) zsn.onclick=()=>{
+    snapOn=!snapOn;
+    zsn.style.color=snapOn?'#1677ff':'';
+    zsn.style.borderColor=snapOn?'#1677ff':'';
+    const bs=document.getElementById('btn-snap');
+    if(bs) bs.classList.toggle('active',snapOn);
+    redraw();
+  };
+  if(zgr) zgr.onchange=()=>{snapSize=parseInt(zgr.value);redraw();};
+  // hdr STL button disabled state
+  function updStl(){
+    const hs=document.getElementById('hdr-stl');
+    if(hs) hs.style.opacity=shapes.length?'1':'.4';
+  }
+  // patch redraw to keep stl btn state
+  const _origRedraw=redraw;
+  // call updZoom once
+  updZoom();
+}
+setTimeout(initVpBar,100);
+
+// ── Confetti engine ───────────────────────
+function launchConfetti(){
+  const cv=document.getElementById('confetti-canvas');
+  if(!cv)return;
+  cv.style.display='block';
+  cv.width=window.innerWidth; cv.height=window.innerHeight;
+  const ctx2=cv.getContext('2d');
+  const pieces=Array.from({length:120},()=>({
+    x:Math.random()*cv.width, y:-20,
+    r:Math.random()*6+3,
+    color:`hsl(${Math.random()*360},90%,60%)`,
+    vx:(Math.random()-0.5)*6, vy:Math.random()*4+2,
+    rot:Math.random()*360, rotV:(Math.random()-0.5)*8,
+  }));
+  let frame=0;
+  function tick(){
+    ctx2.clearRect(0,0,cv.width,cv.height);
+    pieces.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV; p.vy+=0.07;
+      ctx2.save(); ctx2.translate(p.x,p.y); ctx2.rotate(p.rot*Math.PI/180);
+      ctx2.fillStyle=p.color;
+      ctx2.fillRect(-p.r,-p.r/2,p.r*2,p.r);
+      ctx2.restore();
+    });
+    frame++;
+    if(frame<120) requestAnimationFrame(tick);
+    else{ ctx2.clearRect(0,0,cv.width,cv.height); cv.style.display='none'; }
+  }
+  tick();
+}
+
+// ── Tangram panel toggle ─────────────────
+let tgmOpen = true;
+function toggleTgm(){
+  tgmOpen = !tgmOpen;
+  const p = document.getElementById('tgm-panel');
+  const b = document.getElementById('btn-tgm-toggle');
+  p.style.width    = tgmOpen ? '74px' : '0';
+  p.style.padding  = tgmOpen ? '8px 5px' : '0';
+  p.style.overflow = tgmOpen ? 'auto' : 'hidden';
+  p.style.borderRightWidth = tgmOpen ? '1px' : '0';
+  if(b) b.classList.toggle('active', tgmOpen);
+  setTimeout(resizeCanvas, 220);
+}
+
+// ── Init ─────────────────────────────────
+updateHistoryBtns();
+
+</script>
+</body>
+</html>
