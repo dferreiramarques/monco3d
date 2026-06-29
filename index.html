@@ -93,6 +93,56 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 }
 #cert-btn:hover{opacity:.85}
 
+/* Botão 3D flutuante */
+#btn-3d-float{
+  position:absolute;bottom:16px;right:16px;z-index:200;
+  width:80px;height:80px;border-radius:16px;
+  background:linear-gradient(135deg,#1677ff,#0958d9);
+  border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  box-shadow:0 8px 24px rgba(22,119,255,.4), 5px 5px 0 0 rgba(0,0,0,.6);
+  transition:all .25s;
+}
+#btn-3d-float:hover{transform:scale(1.08);box-shadow:0 12px 32px rgba(22,119,255,.6), 5px 5px 0 0 rgba(0,0,0,.6)}
+#btn-3d-float .lbl-3d{
+  font-size:28px;font-weight:900;color:#fff;line-height:1;
+  text-shadow:2px 2px 0 rgba(0,0,0,.3);letter-spacing:-1px;
+}
+#btn-3d-float .lbl-sub{font-size:10px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.05em}
+/* estado "Sair" */
+#btn-3d-float.exit-mode{
+  background:linear-gradient(135deg,#ff4d4f,#cf1322);
+  box-shadow:0 8px 24px rgba(255,77,79,.5);
+}
+#btn-3d-float.exit-mode:hover{box-shadow:0 12px 32px rgba(255,77,79,.7)}
+
+/* Popover de extrusão */
+#extrude-pop{
+  position:fixed;z-index:500;
+  background:var(--ant-color-bg-elevated);
+  border:1px solid var(--ant-color-border);
+  border-radius:12px;padding:14px 18px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  display:none;flex-direction:column;gap:10px;min-width:180px;
+}
+#extrude-pop.open{display:flex}
+#extrude-pop .ep-title{font-size:12px;font-weight:700;color:var(--ant-color-text-secondary);text-transform:uppercase;letter-spacing:.06em}
+#extrude-pop .ep-row{display:flex;align-items:center;gap:8px}
+#extrude-pop .ep-swatch{width:24px;height:24px;border-radius:50%;flex-shrink:0}
+#extrude-pop label{font-size:13px;color:var(--ant-color-text);flex:1}
+#extrude-pop input[type=number]{
+  width:64px;padding:4px 8px;border-radius:6px;
+  background:var(--ant-color-fill-tertiary);
+  border:1px solid var(--ant-color-border);
+  color:var(--ant-color-text);font-size:13px;font-weight:600;text-align:right;
+}
+#extrude-pop .ep-close{
+  align-self:flex-end;font-size:11px;color:var(--ant-color-text-tertiary);
+  cursor:pointer;padding:2px 6px;border-radius:4px;
+  border:1px solid var(--ant-color-border);
+}
+#extrude-pop .ep-close:hover{color:var(--ant-color-text)}
+
 /* ── BODY ROW — flex row, fills between hdr and bot ────────────── */
 #body-row{display:flex;flex:1;overflow:hidden;min-height:0}
 
@@ -118,8 +168,8 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   transition:all var(--ant-motion-duration-mid);flex-shrink:0;
 }
 .shape-btn:hover{border-color:#1677ff;background:rgba(22,119,255,.08)}
-.shape-btn.active{border-color:#1677ff;background:rgba(22,119,255,.15);
-  box-shadow:0 0 0 2px rgba(22,119,255,.2)}
+.shape-btn.active{border-color:#1677ff;background:rgba(22,119,255,.2);
+  box-shadow:0 0 0 3px #1677ff,0 0 18px rgba(22,119,255,.65)}
 
 /* ── STAGE ──────────────────────────────────────────────────────── */
 #stage{flex:1;position:relative;background:#0a0c14;overflow:hidden;min-width:0}
@@ -216,7 +266,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   flex-shrink:0;transition:all var(--ant-motion-duration-mid);color:var(--ant-color-text);
 }
 .tool-btn:hover{border-color:var(--ant-color-text-secondary)}
-.tool-btn.active{background:#1677ff20;border-color:#1677ff;color:#1677ff}
+.tool-btn.active{background:rgba(22,119,255,.18);border-color:#1677ff;color:#1677ff;box-shadow:0 0 0 3px #1677ff,0 0 20px rgba(22,119,255,.65)}
 .tool-btn.danger.active{background:rgba(255,77,79,.15);border-color:#ff4d4f;color:#ff4d4f}
 .tool-btn:disabled{opacity:.3;cursor:default}
 /* STL btn */
@@ -271,6 +321,24 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   opacity:0;transform:translateY(-8px);transition:all .35s;z-index:998;pointer-events:none;
 }
 #ach-pop.show{opacity:1;transform:translateY(0)}
+
+/* Popup central de conquista */
+#ach-popup{
+  position:fixed;top:calc(var(--hdr) + 20px);left:50%;
+  transform:translateX(-50%) translateY(-20px) scale(.85);
+  z-index:1001;pointer-events:none;
+  background:linear-gradient(135deg,#0d1117,#1a2535);
+  border:2px solid #52c41a;border-radius:24px;
+  padding:24px 44px;text-align:center;
+  opacity:0;transition:all .45s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 12px 40px rgba(0,0,0,.7),0 0 30px rgba(82,196,26,.3);
+  min-width:260px;
+}
+#ach-popup.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+#ach-popup .pop-icon{font-size:64px;display:block;margin-bottom:12px;line-height:1}
+#ach-popup .pop-name{font-size:26px;font-weight:800;color:#fff;margin-bottom:8px}
+#ach-popup .pop-pts{font-size:20px;font-weight:700;color:#52c41a}
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:1000;display:none}
 
 /* ── CERTIFICATE ─────────────────────────────────────────────────── */
 #cert-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;
@@ -338,8 +406,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 <!-- HEADER -->
 <div id="hdr">
   <div id="logo">monco <span>3D</span></div>
-  <button class="hdr-btn active" id="tab2d" onclick="setMode('2d')">✏️ Construir</button>
-  <button class="hdr-btn" id="tab3d" onclick="setMode('3d')" disabled>🔮 Ver em 3D</button>
+
   <span style="color:var(--ant-color-border);font-size:20px;padding:0 2px;flex-shrink:0">|</span>
   <button id="hdr-stl" onclick="downloadSTL()" style="background:#faad14;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;opacity:.5" title="Guardar STL">💾 STL</button>
   <button onclick="saveJSON()" style="background:var(--ant-color-fill-secondary);color:var(--ant-color-text-secondary);border:1px solid var(--ant-color-border);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0" title="Guardar JSON">📥 Guardar</button>
@@ -348,7 +415,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   <button id="cert-btn" onclick="openCert()">🏆 Certificado</button>
 </div>
 
-<!-- BODY ROW: lsb | tgm-panel | stage | rsb -->
+<!-- BODY ROW -->
 <div id="body-row">
 
   <!-- LEFT SIDEBAR — formas primitivas -->
@@ -440,6 +507,11 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
     </select>
   </div>
     <div id="hole-badge">⊖ MODO ORIFÍCIO</div>
+    <!-- Botão 3D — canto inf-dir do stage -->
+    <button id="btn-3d-float" onclick="toggle3D()" title="Ver em 3D / Sair">
+      <span class="lbl-3d" id="svg-3d-label">3D</span>
+      <span class="lbl-sub" id="lbl-3d-sub">VER</span>
+    </button>
   </div>
 
   <!-- RIGHT SIDEBAR — conquistas -->
@@ -451,6 +523,13 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 
 <!-- BOTTOM BAR -->
 <div id="bot"></div>
+
+<!-- Popover de extrusão (duplo clique na cor) -->
+<div id="extrude-pop">
+  <div class="ep-title">Espessura de extrusão</div>
+  <!-- linhas geradas por JS -->
+  <button class="ep-close" onclick="closeExtrudePop()">✕ Fechar</button>
+</div>
 
 </div><!-- /app -->
 
@@ -673,7 +752,8 @@ function showAchPop(msg, icon, pts){
   COLOR_DEFS.forEach(cd=>{
     const wrap=document.createElement('div');
     wrap.className='col-wrap'+(cd.hex===activeColor?' active':'');
-    wrap.title=cd.name+(cd.hole?'':' — '+cd.label);
+    wrap.dataset.hex=cd.hex;
+    wrap.title=cd.hole?cd.name:cd.name+' — duplo clique para editar espessura';
 
     const sw=document.createElement('div');
     sw.className='col-sw'+(cd.hole?' hole':'');
@@ -685,6 +765,7 @@ function showAchPop(msg, icon, pts){
 
     wrap.appendChild(sw);
     wrap.appendChild(lbl);
+    if(!cd.hole) wrap.ondblclick=(ev)=>{ev.stopPropagation();openExtrudePop(cd.hex,wrap);};
     wrap.onclick=()=>{
       document.querySelectorAll('.col-wrap').forEach(x=>x.classList.remove('active'));
       wrap.classList.add('active');
@@ -743,6 +824,7 @@ function mkToolBtn(emoji,toolName,title){
   b.onclick=()=>{
     activeTool=toolName;
     document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.shape-btn[data-shape]').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     selectedIds.clear();fhDrawing=false;fhCurrent=[];lasso=null;groupXform=null;
     canvas.style.cursor=toolName==='erase'?'crosshair':'default';
@@ -793,10 +875,10 @@ document.querySelectorAll('.shape-btn[data-shape]').forEach(btn=>{
     }
 
     document.querySelectorAll('.shape-btn[data-shape]').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
     btn.classList.add('active');
     if(activeTool==='freehand'){
       activeTool='select';
-      document.querySelectorAll('[data-tool="select"]').forEach(x=>x.classList.add('active'));
       canvas.style.cursor='default';
     }
 
@@ -812,6 +894,12 @@ document.querySelectorAll('.shape-btn[data-shape]').forEach(btn=>{
     };
     shapes.push(s);
     selectedIds=new Set([s.id]);
+    // mudar automaticamente para select (dedo) após adicionar forma
+    activeTool='select';
+    document.querySelectorAll('.shape-btn[data-shape]').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('[data-tool="select"]').forEach(x=>x.classList.add('active'));
+    canvas.style.cursor='default';
     redraw();updateAchs();
     if(['rect','circle','triangle','star','heart'].includes(type)) unlockAch(type);
     if(activeColor===HOLE_COLOR) unlockAch('hole');
@@ -1021,8 +1109,8 @@ function redraw(){
   // UI state
   const has=shapes.length>0;
   document.getElementById('hint2d').style.opacity=has?'0':'0.15';
-  document.getElementById('tab3d').disabled=!has;
   const _s=document.getElementById('hdr-stl');if(_s)_s.style.opacity=has?'1':'.45';
+  const _b3=document.getElementById('btn-3d-float');if(_b3)_b3.style.opacity=has?'1':'.4';
 }
 
 function drawHandles(s){
@@ -1550,16 +1638,25 @@ function updateAchs(){
 // ═══════════════════════════════════════
 function setMode(m){
   mode=m;
-  canvas.style.display                              =m==='2d'?'block':'none';
-  document.getElementById('hint2d').style.display  =m==='2d'?'flex':'none';
+  canvas.style.display                               =m==='2d'?'block':'none';
+  document.getElementById('hint2d').style.display   =m==='2d'?'flex':'none';
   document.getElementById('three-mount').style.display=m==='3d'?'block':'none';
-  document.getElementById('tab2d').classList.toggle('active',m==='2d');
-  document.getElementById('tab3d').classList.toggle('active',m==='3d');
   document.getElementById('fh-cursor').style.display='none';
   document.getElementById('hole-badge').style.display='none';
+  // botão flutuante: 3D/VER ↔ ✏️/EDITAR
+  const btn3d=document.getElementById('btn-3d-float');
+  if(btn3d){
+    btn3d.classList.toggle('exit-mode',m==='3d');
+    const lbl=document.getElementById('svg-3d-label');
+    const sub=document.getElementById('lbl-3d-sub');
+    if(lbl) lbl.textContent=m==='3d'?'✏️':'3D';
+    if(sub) sub.textContent=m==='3d'?'EDITAR':'VER';
+  }
   if(m==='3d'){buildMesh3D();unlockAch('view3d');}
   else redraw();
 }
+
+function toggle3D(){setMode(mode==='3d'?'2d':'3d');}
 
 // ═══════════════════════════════════════
 // THREE.JS
@@ -1918,73 +2015,63 @@ function closeCert(){document.getElementById('cert-modal').classList.remove('ope
 // ══════════════════════════════════════════════════════════════════
 // TANGRAM HANDLERS
 // ══════════════════════════════════════════════════════════════════
-const TGM_COLOR = '#ff4d4f'; // Ant red-5
-const TGM_Z     = 1;         // 1mm fixo para todas as peças tangram
+// [tangram removido]
+
+// ── Popover de extrusão ──────────────────────────────────────────
+function openExtrudePop(cdHex, anchorEl){
+  const pop=document.getElementById('extrude-pop');
+  if(!pop) return;
+  const r=anchorEl.getBoundingClientRect();
+  pop.style.left=r.left+'px';
+  pop.style.top=(r.top-10)+'px';
+  pop.style.transform='translateY(-100%)';
+  const closeBtn=pop.querySelector('.ep-close');
+  pop.querySelectorAll('.ep-row').forEach(r=>r.remove());
+  COLOR_DEFS.filter(cd=>!cd.hole).forEach(cd=>{
+    const row=document.createElement('div');
+    row.className='ep-row';
+    const sw=document.createElement('div');
+    sw.className='ep-swatch';sw.style.background=cd.hex;
+    const lbl=document.createElement('label');
+    lbl.textContent=cd.name||cd.label;
+    const inp=document.createElement('input');
+    inp.type='number';inp.min='0.5';inp.max='20';inp.step='0.5';inp.value=cd.z;
+    inp.onchange=()=>{
+      const newZ=Math.max(0.5,Math.min(20,parseFloat(inp.value)||cd.z));
+      cd.z=newZ;cd.label=newZ+'mm';inp.value=newZ;
+      document.querySelectorAll('.col-lbl').forEach(el=>{
+        const w=el.closest('[data-hex]');
+        if(w&&w.dataset.hex===cd.hex) el.textContent=newZ+'mm';
+      });
+      shapes.forEach(s=>{ if(s.color===cd.hex) s.zMm=newZ; });
+      redraw();
+    };
+    row.appendChild(sw);row.appendChild(lbl);row.appendChild(inp);
+    pop.insertBefore(row,closeBtn);
+  });
+  pop.classList.add('open');
+  setTimeout(()=>{
+    function outside(e){if(!pop.contains(e.target)){closeExtrudePop();document.removeEventListener('pointerdown',outside);}}
+    document.addEventListener('pointerdown',outside);
+  },10);
+}
+function closeExtrudePop(){
+  const pop=document.getElementById('extrude-pop');
+  if(pop) pop.classList.remove('open');
+}
 
 // Tamanhos canónicos das peças (em px, escalam com o canvas)
 // Base unit U = min(cw,ch)*0.13 — tri pequeno ocupa U×U
 // Cada tri. tangram é rectângulo isósceles: catetos = L, hypotenusa = L√2
 // fhPoints em coords absolutas calculadas no momento do clique.
 // Quadrado: tipo rect normal (não rotado). Para: tipo para.
-// makeTri(cx,cy,L,orient): 4 orientações do tri rectângulo
 //   'BL' = ângulo recto em Baixo-Esquerda  (L1)
 //   'BR' = ângulo recto em Baixo-Direita   (L2)
 //   'TL' = ângulo recto em Topo-Esquerda   
 //   'TR' = ângulo recto em Topo-Direita    
-function makeTri(cx, cy, L, orient) {
-  const h = L / 2;
-  switch(orient) {
-    case 'BL': return [{x:cx-h,y:cy+h},{x:cx+h,y:cy+h},{x:cx-h,y:cy-h}];
-    case 'BR': return [{x:cx-h,y:cy+h},{x:cx+h,y:cy+h},{x:cx+h,y:cy-h}];
-    case 'TL': return [{x:cx-h,y:cy-h},{x:cx+h,y:cy-h},{x:cx-h,y:cy+h}];
-    case 'TR': return [{x:cx-h,y:cy-h},{x:cx+h,y:cy-h},{x:cx+h,y:cy+h}];
-  }
-}
-function makePara(cx, cy, L) {
-  // paralelogramo: base 2L, altura L, inclinado L
-  const w = L, h = L/2;
-  return [{x:cx-w,y:cy+h},{x:cx,y:cy-h},{x:cx+w,y:cy-h},{x:cx,y:cy+h}];
-}
+// [tangram handlers removidos]
 
-const TGM_PIECE_FN = {
-  'tg-L1': (cx,cy,U) => makeTri(cx, cy, U*2, 'BL'),  // tri grande, ∟ baixo-esq
-  'tg-L2': (cx,cy,U) => makeTri(cx, cy, U*2, 'BR'),  // tri grande, ∟ baixo-dir
-  'tg-M':  (cx,cy,U) => makeTri(cx, cy, U*Math.SQRT2, 'BL'), // tri médio
-  'tg-S1': (cx,cy,U) => makeTri(cx, cy, U,   'BL'),  // tri pequeno, ∟ baixo-esq
-  'tg-S2': (cx,cy,U) => makeTri(cx, cy, U,   'BR'),  // tri pequeno, ∟ baixo-dir
-  'tg-SQ': null,   // quadrado: tipo rect normal
-  'tg-P':  null,   // paralelogramo: tipo para
-};
 
-document.querySelectorAll('[data-tangram]').forEach(btn => {
-  btn.onclick = () => {
-    if (mode !== '2d') return;
-    const key = btn.dataset.tangram;
-    resizeCanvas();
-    pushUndo();
-    const U  = Math.min(canvas.width, canvas.height) * 0.08;
-    const cx = canvas.width  / 2 + (Math.random() - .5) * 60;
-    const cy = canvas.height / 2 + (Math.random() - .5) * 60;
-    let s;
-    if (key === 'tg-SQ') {
-      // quadrado: rect com lado U, sem rotação
-      s = { id:nextId++, type:'rect', x:cx, y:cy,
-            w:U, h:U, rot:0, color:TGM_COLOR, zMm:TGM_Z };
-    } else if (key === 'tg-P') {
-      // paralelogramo: tipo para com w=2U, h=U
-      s = { id:nextId++, type:'para', x:cx, y:cy,
-            w:U*2, h:U, rot:0, color:TGM_COLOR, zMm:TGM_Z };
-    } else {
-      const fn = TGM_PIECE_FN[key];
-      if (!fn) return;
-      s = { id:nextId++, type:'freehand', x:0, y:0, w:0, h:0, rot:0,
-            color:TGM_COLOR, zMm:TGM_Z, fhPoints: fn(cx, cy, U) };
-    }
-    shapes.push(s);
-    selectedIds = new Set([s.id]);
-    redraw(); updateAchs();
-  };
-});
 
 
 
