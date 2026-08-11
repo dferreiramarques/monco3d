@@ -105,10 +105,10 @@ index.html
 
 ## Autoria
 
-**David Araújo** — CEO, Monco.io  
+**David Marques**
 Portugal · [monco.io](https://monco.io)
 
-Apoiar o projecto: [☕ Ko-fi](https://ko-fi.com/monco)
+Apoiar o projecto: [☕ Ko-fi](https://ko-fi.com/dferreiramarques)
 
 ---
 
