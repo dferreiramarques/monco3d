@@ -58,7 +58,7 @@ Uma aplicação web single-file (`index.html`) que corre 100% no browser, sem ba
 ## Estrutura do ficheiro
 
 ```
-monco3d_v50_final.html
+index.html
 ├── <style>          — CSS completo (Ant Design tokens, layout, componentes)
 ├── <body>           — HTML (header, lsb, stage, rsb, modais)
 └── <script>         — JS inline (~1600 linhas)
