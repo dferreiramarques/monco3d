@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>monco.io | 3D divertido</title>
+<title>3D Monco (beta)</title>
 <style>
 /* ── Ant Design token palette (dark theme adapted) ──────────────── */
 :root {
@@ -40,9 +40,9 @@
   --ant-motion-duration-fast: .1s;
   --ant-motion-duration-mid:  .2s;
   /* Layout dims */
-  --hdr:  90px;
-  --bot:  100px;
-  --lsb:  104px;
+  --hdr:  52px;
+  --bot:  68px;
+  --lsb:  80px;
   --rsb: 160px;
   --tgm:   0px; /* controlled by JS */
 }
@@ -66,12 +66,54 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   border-bottom:1px solid var(--ant-color-border);
   display:flex;align-items:center;gap:8px;padding:0 16px;z-index:100;
 }
-#logo{font-size:40px;font-weight:700;color:#1677ff;letter-spacing:-.5px;flex-shrink:0}
-#logo span{color:#faad14}
+#logo{font-size:28px;font-weight:700;color:#1677ff;letter-spacing:-.5px;flex-shrink:0;
+  cursor:pointer;display:flex;align-items:center;gap:6px;}
+#logo:hover{opacity:.85}
+#logo .logo-text span{color:#faad14}
+#logo .beta-badge{
+  font-size:11px;font-weight:700;color:#faad14;
+  background:rgba(250,173,20,.15);border:1px solid rgba(250,173,20,.4);
+  border-radius:100px;padding:2px 8px;letter-spacing:.04em;
+  align-self:flex-start;margin-top:4px;
+}
+/* Modal créditos */
+#credits-modal{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+}
+#credits-modal.open{display:flex}
+#credits-inner{
+  background:var(--ant-color-bg-elevated);
+  border:1px solid var(--ant-color-border);
+  border-radius:20px;padding:36px 44px;max-width:420px;width:90%;
+  text-align:center;position:relative;
+}
+#credits-inner h2{font-size:28px;font-weight:800;color:#1677ff;margin-bottom:4px}
+#credits-inner h2 span{color:#faad14}
+#credits-inner .credits-sub{font-size:12px;color:var(--ant-color-text-tertiary);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px}
+#credits-inner .credits-desc{font-size:14px;color:var(--ant-color-text-secondary);
+  line-height:1.7;margin-bottom:20px}
+#credits-inner .credits-author{font-size:13px;font-weight:600;
+  color:var(--ant-color-text);margin-bottom:20px}
+#credits-inner .kofi-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#FF5E5B;color:#fff;border-radius:100px;
+  padding:10px 22px;font-size:14px;font-weight:700;
+  text-decoration:none;transition:opacity .15s;
+}
+#credits-inner .kofi-btn:hover{opacity:.85}
+#credits-close{
+  position:absolute;top:12px;right:14px;
+  font-size:18px;color:var(--ant-color-text-tertiary);
+  cursor:pointer;background:none;border:none;padding:4px 8px;
+}
+#credits-close:hover{color:var(--ant-color-text)}
 .hdr-btn{
   background:transparent;color:var(--ant-color-text-secondary);
   border:1px solid transparent;border-radius:var(--ant-border-radius);
-  padding:10px 24px;font-size:26px;font-weight:600;
+  padding:6px 16px;font-size:16px;font-weight:600;
   transition:all var(--ant-motion-duration-mid);flex-shrink:0;
 }
 .hdr-btn:hover{border-color:var(--ant-color-border);color:var(--ant-color-text)}
@@ -83,12 +125,12 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   border:1px solid var(--ant-color-warning);
   border-radius:100px;padding:3px 14px;
   display:flex;align-items:center;gap:5px;
-  font-size:20px;font-weight:700;color:var(--ant-color-warning);flex-shrink:0;
+  font-size:14px;font-weight:700;color:var(--ant-color-warning);flex-shrink:0;
 }
 #cert-btn{
   background:#1677ff;color:#fff;
   border-radius:var(--ant-border-radius);
-  padding:10px 22px;font-size:20px;font-weight:600;
+  padding:6px 16px;font-size:14px;font-weight:600;
   flex-shrink:0;transition:opacity var(--ant-motion-duration-fast);
 }
 #cert-btn:hover{opacity:.85}
@@ -237,9 +279,9 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
   font-size:9px;font-weight:700;color:var(--ant-color-text-tertiary);
   text-transform:uppercase;letter-spacing:.08em;text-align:center;flex-shrink:0;
 }
-.lsb-sep{width:74px;height:1px;background:var(--ant-color-border);flex-shrink:0;margin:3px 0}
+.lsb-sep{width:56px;height:1px;background:var(--ant-color-border);flex-shrink:0;margin:3px 0}
 .shape-btn{
-  width:90px;height:75px;border-radius:var(--ant-border-radius);
+  width:72px;height:56px;border-radius:var(--ant-border-radius);
   background:var(--ant-color-fill-tertiary);
   border:1px solid var(--ant-color-border);
   display:flex;align-items:center;justify-content:center;
@@ -349,20 +391,20 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 /* colour swatches */
 .col-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;
   flex-shrink:0;cursor:pointer}
-.col-sw{width:52px;height:52px;border-radius:50%;
+.col-sw{width:36px;height:36px;border-radius:50%;
   border:2px solid var(--ant-color-border);transition:all .12s;flex-shrink:0}
 .col-wrap.active .col-sw{border:2px solid #fff;transform:scale(1.2)}
-.col-lbl{font-size:13px;font-weight:700;color:var(--ant-color-text-tertiary);white-space:nowrap}
+.col-lbl{font-size:9px;font-weight:700;color:var(--ant-color-text-tertiary);white-space:nowrap}
 .col-wrap.active .col-lbl{color:var(--ant-color-text)}
 .col-sw.hole{background:#111;position:relative}
 .col-sw.hole::after{content:"⊖";position:absolute;inset:0;display:flex;
   align-items:center;justify-content:center;font-size:14px;color:#ff4d4f}
 /* tool buttons */
 .tool-btn{
-  width:86px;height:86px;border-radius:var(--ant-border-radius);
+  width:52px;height:52px;border-radius:var(--ant-border-radius);
   background:var(--ant-color-fill-tertiary);
   border:1px solid var(--ant-color-border);
-  font-size:36px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;transition:all var(--ant-motion-duration-mid);color:var(--ant-color-text);
 }
 .tool-btn:hover{border-color:var(--ant-color-text-secondary)}
@@ -491,16 +533,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 .cert-close-btn{background:rgba(255,255,255,.2);color:#fff;
   border-radius:var(--ant-border-radius);padding:8px 12px;
   font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
-@media print{
-  #cert-modal{position:fixed;inset:0;background:none;padding:0;display:flex!important;
-    align-items:center;justify-content:center}
-  #cert-inner{width:100%;max-height:none;box-shadow:none}
-  .cert-actions{display:none}
-  #cert-name-in{display:none!important}
-  #cert-name-show{display:block!important}
-  body>*:not(#cert-modal){display:none!important}
-  @page{size:landscape;margin:.5cm}
-}
+/* print removido — usar exportCert() */
 </style>
 </head>
 <body>
@@ -508,7 +541,10 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 
 <!-- HEADER -->
 <div id="hdr">
-  <div id="logo">monco<span>.io</span></div>
+  <div id="logo" onclick="document.getElementById('credits-modal').classList.add('open')" title="Sobre o 3D Monco">
+    <span class="logo-text">3D <span>Monco</span></span>
+    <span class="beta-badge">beta</span>
+  </div>
 
   <span style="color:var(--ant-color-border);font-size:20px;padding:0 2px;flex-shrink:0">|</span>
   <button id="hdr-stl" onclick="downloadSTL()" style="background:#faad14;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;opacity:.5" title="Guardar STL">💾 STL</button>
@@ -662,6 +698,30 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 
 </div><!-- /app -->
 
+<!-- Modal de créditos -->
+<div id="credits-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="credits-inner">
+    <button id="credits-close" onclick="document.getElementById('credits-modal').classList.remove('open')">✕</button>
+    <h2>3D <span>Monco</span></h2>
+    <div class="credits-sub">Modelação & Impressão 3D para crianças</div>
+    <div class="credits-desc">
+      Uma ferramenta educativa open-source para introduzir crianças do ensino básico
+      ao design 3D e à impressão 3D, de forma simples e divertida.
+    </div>
+    <div class="credits-author">
+      ✏️ Criado por <strong>David Araújo</strong><br>
+      <span style="font-size:12px;opacity:.6">CEO · Monco.io · Portugal</span>
+    </div>
+    <a class="kofi-btn" href="https://ko-fi.com/monco" target="_blank" rel="noopener">
+      ☕ Apoia no Ko-fi
+    </a>
+    <div style="margin-top:16px;font-size:11px;color:var(--ant-color-text-tertiary)">
+      🌐 <a href="https://3d.monco.io" target="_blank" style="color:#1677ff;text-decoration:none">3d.monco.io</a>
+      &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; v50 MVP
+    </div>
+  </div>
+</div>
+
 <div id="ach-popup">
   <span class="pop-icon" id="pop-icon">⭐</span>
   <div class="pop-name" id="pop-name">Conquista!</div>
@@ -697,7 +757,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 
     <!-- LEFT PANEL -->
     <div id="cert-left">
-      <div class="cert-logo">monco <span>3D</span></div>
+      <div class="cert-logo">3D Monco</div>
       <div class="cert-title">Certificado<br>de Criador</div>
       <div class="cert-sub2">Modelação &amp; Impressão 3D</div>
 
@@ -720,7 +780,8 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
       <h2>🏅 Conquistas desbloqueadas</h2>
       <div class="cert-achs" id="cert-achs-show"></div>
       <div class="cert-actions">
-        <button class="cert-print" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="cert-print" onclick="exportCert('download')">📥 Guardar imagem</button>
+        <button class="cert-print" onclick="exportCert('share')" style="background:#25d366">📤 Partilhar</button>
         <button class="cert-close-btn" onclick="closeCert()">✕ Fechar</button>
       </div>
     </div>
@@ -729,6 +790,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:none}
 </div>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js"></script>
 <script>
@@ -2324,7 +2386,7 @@ function downloadSTL(){
   const tri=pos.length/9;
   const buf=new ArrayBuffer(84+tri*50);
   const dv=new DataView(buf);
-  const hdr='Monco3D';for(let i=0;i<hdr.length;i++)dv.setUint8(i,hdr.charCodeAt(i));
+  const hdr='3DMonco';for(let i=0;i<hdr.length;i++)dv.setUint8(i,hdr.charCodeAt(i));
   dv.setUint32(80,tri,true);
   let off=84;
   for(let t=0;t<tri;t++){
@@ -2352,6 +2414,44 @@ function showToast(msg){
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
 }
+async function exportCert(action){
+  const inner=document.getElementById('cert-inner');
+  if(!inner||typeof html2canvas==='undefined') return;
+  // Mostrar o nome e esconder o input antes de capturar
+  const ni=document.getElementById('cert-name-in');
+  const ns=document.getElementById('cert-name-show');
+  ns.style.display='block';
+  ni.style.display='none';
+  const actions=inner.querySelector('.cert-actions');
+  if(actions) actions.style.display='none';
+  try{
+    const canvas=await html2canvas(inner,{
+      scale:2, useCORS:true, backgroundColor:'#fffbe6',
+      logging:false
+    });
+    const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+    if(action==='share'&&navigator.canShare&&navigator.canShare({files:[new File([blob],'certificado.png',{type:'image/png'})]})){
+      await navigator.share({
+        title:'3D Monco — Certificado de Criador',
+        text:'Acabei de criar em 3D! 🎨🖨️',
+        url:'https://3d.monco.io',
+        files:[new File([blob],'certificado_monco.png',{type:'image/png'})]
+      });
+    } else {
+      // fallback: download
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='certificado_monco.png';
+      document.body.appendChild(a);a.click();
+      document.body.removeChild(a);URL.revokeObjectURL(url);
+    }
+  } finally {
+    ns.style.display='none';
+    ni.style.display='';
+    if(actions) actions.style.display='';
+  }
+}
+
 function openCert(){
   document.getElementById('cert-modal').classList.add('open');
   // score
