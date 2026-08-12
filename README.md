@@ -2,7 +2,7 @@
 
 > Modelação & Impressão 3D para crianças do ensino básico e secundário
 
-**3D Monco** é uma ferramenta educativa open-source que permite a crianças dos 6 aos 18 anos criar modelos 3D directamente no browser, exportar para STL e enviar para impressora 3D — tudo sem instalação, sem conta, sem fricção.
+**3D Monco** é uma ferramenta educativa open-source que permite a crianças dos 6 aos 14 anos criar modelos 3D directamente no browser, exportar para STL e enviar para impressora 3D — tudo sem instalação, sem conta, sem fricção.
 
 🌐 [3d.monco.io](https://3d.monco.io)
 
