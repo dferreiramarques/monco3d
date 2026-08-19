@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mosaico Colaborativo — Atividade de Modelação 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F4EC;
+    --ink:#15140F;
+    --rule:#D9D5C4;
+    --lock:#EDEADE;
+    --c1:#C4552D; /* cor 1 - terracota */
+    --c2:#2E6E62; /* cor 2 - verde escuro */
+    --c3:#D9A441; /* cor 3 - ocre */
+    --mono:'DM Mono',monospace;
+    --disp:'Bricolage Grotesque',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      linear-gradient(var(--rule) 1px,transparent 1px),
+      linear-gradient(90deg,var(--rule) 1px,transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:var(--disp);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px}
+  section{border-bottom:1.5px solid var(--ink)}
+  section.first{border-top:1.5px solid var(--ink)}
+
+  /* topbar */
+  .topbar{background:var(--paper);border-bottom:1.5px solid var(--ink);position:sticky;top:0;z-index:10}
+  .topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+  .topbar span{opacity:.75}
+  .topbar span:first-child{opacity:1;font-weight:500}
+
+  /* hero */
+  .hero{padding:64px 0 48px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--c1);margin-bottom:18px}
+  h1{font-size:clamp(40px,7vw,68px);font-weight:800;line-height:.98;letter-spacing:-.02em;max-width:11ch}
+  .lede{font-size:18px;line-height:1.55;max-width:52ch;margin-top:22px;color:#3a3830}
+  .meta-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1.5px solid var(--ink);margin-top:36px}
+  .meta-row div{padding:14px 16px;border-right:1.5px solid var(--ink)}
+  .meta-row div:last-child{border-right:none}
+  .meta-row b{display:block;font-size:20px;font-weight:700;margin-bottom:2px}
+  .meta-row span{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
+
+  /* mosaic signature */
+  .mosaic-preview{margin-top:44px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:480px}
+  .tile{aspect-ratio:1;border:1.5px solid var(--ink);display:flex;align-items:flex-end;justify-content:flex-end;padding:5px;font-family:var(--mono);font-size:10px;position:relative;overflow:hidden}
+  .tile::before{content:'';position:absolute;inset:0;opacity:.85}
+  .tile span{position:relative;z-index:1;background:var(--paper);padding:1px 3px;border-radius:2px}
+  .t1::before{background:var(--c1)}
+  .t2::before{background:var(--c2)}
+  .t3::before{background:var(--c3)}
+  .t4::before{background:repeating-linear-gradient(45deg,var(--c1) 0 6px,var(--c3) 6px 12px)}
+  .t5::before{background:var(--lock)}
+  .mosaic-caption{font-family:var(--mono);font-size:11px;margin-top:10px;opacity:.65;max-width:480px}
+
+  /* section shell */
+  .sec{padding:52px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:28px}
+  .sec-num{font-family:var(--mono);font-size:13px;color:var(--c1);font-weight:500}
+  h2{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-.01em}
+  .sec-sub{font-family:var(--mono);font-size:12px;opacity:.6;margin-top:-18px;margin-bottom:28px;padding-left:calc(13px + 14px)}
+
+  /* conceito grid */
+  .rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--ink)}
+  .rule-card{padding:22px 24px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+  .rule-card:nth-child(2n){border-right:none}
+  .rule-card:nth-last-child(-n+2){border-bottom:none}
+  .rule-card .k{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:8px}
+  .rule-card .v{font-size:20px;font-weight:700;margin-bottom:6px}
+  .rule-card p{font-size:14px;line-height:1.5;color:#3a3830}
+  .swatches{display:flex;gap:6px;margin-top:14px;align-items:flex-end}
+  .sw{width:22px;border:1.5px solid var(--ink)}
+
+  /* fluxo steps */
+  .flow{display:flex;flex-direction:column;border:1.5px solid var(--ink)}
+  .step{display:grid;grid-template-columns:64px 1fr;border-bottom:1.5px solid var(--ink)}
+  .step:last-child{border-bottom:none}
+  .step-num{font-family:var(--mono);font-size:13px;padding:20px 0 20px 20px;font-weight:500;color:var(--c1)}
+  .step-body{padding:20px 20px 20px 0;border-left:1.5px solid var(--ink)}
+  .step-body h3{font-size:17px;font-weight:700;margin-bottom:6px}
+  .step-body p{font-size:14px;line-height:1.5;color:#3a3830}
+  .who{display:inline-block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border:1px solid var(--ink);margin-top:8px;margin-right:6px}
+  .swap-mark{background:var(--ink);color:var(--paper)}
+
+  /* cronograma */
+  .timeline{border:1.5px solid var(--ink)}
+  .trow{display:grid;grid-template-columns:100px 1fr 90px;border-bottom:1.5px solid var(--ink);align-items:stretch}
+  .trow:last-child{border-bottom:none}
+  .trow .time{font-family:var(--mono);font-size:12px;padding:16px;border-right:1.5px solid var(--ink);display:flex;align-items:center}
+  .trow .desc{padding:16px;border-right:1.5px solid var(--ink)}
+  .trow .desc b{font-size:15px;display:block;margin-bottom:3px}
+  .trow .desc span{font-size:13px;color:#3a3830;line-height:1.45}
+  .trow .dur{font-family:var(--mono);font-size:11px;padding:16px;display:flex;align-items:center;justify-content:flex-end;opacity:.6}
+  .trow.accent{background:var(--lock)}
+
+  /* logistica */
+  .logistics{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .log-box{border:1.5px solid var(--ink);padding:22px}
+  .log-box .big{font-family:var(--mono);font-size:38px;font-weight:500;line-height:1}
+  .log-box .lbl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.6;margin-top:6px}
+  .log-box p{font-size:14px;line-height:1.5;margin-top:14px;color:#3a3830}
+  .checklist{list-style:none;margin-top:14px}
+  .checklist li{font-size:14px;line-height:1.6;padding-left:20px;position:relative;color:#3a3830}
+  .checklist li::before{content:'—';position:absolute;left:0;color:var(--c1)}
+
+  /* footer */
+  footer{padding:48px 0 64px}
+  footer .wrap{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px}
+  footer .fnote{font-size:14px;max-width:44ch;color:#3a3830;line-height:1.5}
+  footer .fmeta{font-family:var(--mono);font-size:11px;text-align:right;opacity:.6;line-height:1.8}
+
+  @media(max-width:680px){
+    .meta-row{grid-template-columns:1fr 1fr}
+    .meta-row div{border-bottom:1.5px solid var(--ink)}
+    .rule-grid{grid-template-columns:1fr}
+    .rule-card{border-right:none}
+    .step{grid-template-columns:44px 1fr}
+    .trow{grid-template-columns:76px 1fr;}
+    .trow .dur{display:none}
+    .logistics{grid-template-columns:1fr}
+    .mosaic-preview{grid-template-columns:repeat(5,1fr);max-width:100%}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>3d.monco.io</span>
+    <span>Atividade · Mosaico Colaborativo</span>
+    <span>2h · a pares</span>
+  </div>
+</div>
+
+<section class="first hero">
+  <div class="wrap">
+    <div class="eyebrow">Atividade · Modelação 3D em pares</div>
+    <h1>Mosaico Colaborativo</h1>
+    <p class="lede">Cada par desenha e modela uma peça própria — plana, de baixo relevo, com até 3 alturas de extrusão. No fim da semana, as peças de toda a turma juntam-se numa parede do centro.</p>
+
+    <div class="meta-row">
+      <div><b>2h</b><span>Duração</span></div>
+      <div><b>A pares</b><span>Formato</span></div>
+      <div><b>15×15</b><span>Máx. em cm</span></div>
+      <div><b>3</b><span>Alturas por peça</span></div>
+    </div>
+
+    <div class="mosaic-preview">
+      <div class="tile t1"><span>01</span></div>
+      <div class="tile t5"><span>02</span></div>
+      <div class="tile t3"><span>03</span></div>
+      <div class="tile t2"><span>04</span></div>
+      <div class="tile t5"><span>05</span></div>
+      <div class="tile t4"><span>06</span></div>
+      <div class="tile t2"><span>07</span></div>
+      <div class="tile t5"><span>08</span></div>
+      <div class="tile t1"><span>09</span></div>
+      <div class="tile t3"><span>10</span></div>
+      <div class="tile t5"><span>11</span></div>
+      <div class="tile t3"><span>12</span></div>
+      <div class="tile t1"><span>13</span></div>
+      <div class="tile t2"><span>14</span></div>
+      <div class="tile t5"><span>15</span></div>
+    </div>
+    <p class="mosaic-caption">Uma peça por par — a disposição final na parede fecha-se depois de todas impressas.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">01</span><h2>O conceito</h2></div>
+    <div class="rule-grid">
+      <div class="rule-card">
+        <div class="k">Formato</div>
+        <div class="v">Panqueca</div>
+        <p>Peça plana e fina — desenho 2D extrudido, sem geometria complexa. Espessura baixa (poucos mm), pensada para colar ou fixar à parede.</p>
+      </div>
+      <div class="rule-card">
+        <div class="k">Tamanho</div>
+        <div class="v">Máx. 15 × 15 cm</div>
+        <p>Cada par trabalha dentro deste limite. Pode ser mais pequena — não precisa de preencher o quadrado todo.</p>
+      </div>
+      <div class="rule-card">
+        <div class="k">Relevo</div>
+        <div class="v">3 alturas</div>
+        <p>No 3d.monco.io, cada cor do desenho corresponde a uma altura de extrusão diferente. Três cores = três níveis de relevo na peça — impressa numa única cor de filamento.</p>
+        <div class="swatches">
+          <div class="sw" style="background:var(--c1);height:10px;align-self:flex-end"></div>
+          <div class="sw" style="background:var(--c2);height:16px;align-self:flex-end"></div>
+          <div class="sw" style="background:var(--c3);height:22px;align-self:flex-end"></div>
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="k">Tema</div>
+        <div class="v">Um mote comum</div>
+        <p>Escolhe um mote para a turma (ex: "um símbolo teu", "uma paisagem", "um animal") — mantém o mosaico coerente mesmo com 15 desenhos diferentes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Fluxo por par</h2></div>
+    <p class="sec-sub">Um desenha, o outro modela — depois trocam, para que ambos passem pelo computador.</p>
+    <div class="flow">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h3>Desenho em papel</h3>
+          <p>Na grelha quadriculada, esboçam a peça: contorno, zonas de cor, medidas em cm. É o plano que vai para o computador.</p>
+          <span class="who">Elemento A desenha</span><span class="who">Elemento B acompanha</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h3>Modelação no 3d.monco.io</h3>
+          <p>No PC, o par constrói a forma base a partir do desenho: contorno extrudido, altura baixa, zonas marcadas para as 3 cores.</p>
+          <span class="who">Elemento B modela</span><span class="who">Elemento A guia pelo desenho</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h3 class="swap-label">Troca de papéis</h3>
+          <p>Invertem funções: quem desenhou passa a modelar os últimos ajustes e as zonas de cor; quem modelou revê proporções e detalhe.</p>
+          <span class="who swap-mark">Troca ↔</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h3>Exportação</h3>
+          <p>Exportam o STL e preenchem a etiqueta: nome do par, número da peça, cores usadas. Ficheiro pronto para a fila de impressão.</p>
+          <span class="who">Ambos confirmam</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Cronograma · 2h</h2></div>
+    <div class="timeline">
+      <div class="trow">
+        <div class="time">00:00</div>
+        <div class="desc"><b>Abertura</b><span>Regras da peça (tamanho, cores, panqueca), mote do mosaico, demo rápida do 3d.monco.io ao grupo todo.</span></div>
+        <div class="dur">10 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">00:10</div>
+        <div class="desc"><b>Desenho em papel</b><span>Cada par esboça a peça na grelha. Atribui-se o número de posição no mosaico.</span></div>
+        <div class="dur">15 min</div>
+      </div>
+      <div class="trow accent">
+        <div class="time">00:25</div>
+        <div class="desc"><b>Modelação · Bloco 1</b><span>Os pares entram nos computadores disponíveis; quem ainda está a acabar o desenho continua e entra assim que houver lugar. Modelador constrói a forma base.</span></div>
+        <div class="dur">35 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:00</div>
+        <div class="desc"><b>Troca de papéis</b><span>Todos os pares invertem funções — quem desenhou passa ao teclado/rato.</span></div>
+        <div class="dur">5 min</div>
+      </div>
+      <div class="trow accent">
+        <div class="time">01:05</div>
+        <div class="desc"><b>Modelação · Bloco 2</b><span>Novo modelador finaliza níveis de altura e detalhe. Quem ficou em atraso no bloco 1 fecha aqui.</span></div>
+        <div class="dur">30 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:35</div>
+        <div class="desc"><b>Exportação + etiqueta</b><span>STL exportado, ficheiro nomeado, etiqueta preenchida com par + posição + cores.</span></div>
+        <div class="dur">10 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:45</div>
+        <div class="desc"><b>Mini-exposição</b><span>Cada par mostra o ecrã com a peça final. Volta rápida pela sala.</span></div>
+        <div class="dur">10 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:55</div>
+        <div class="desc"><b>Fecho</b><span>Explicar os próximos passos: impressão durante a semana, montagem na parede.</span></div>
+        <div class="dur">5 min</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Antes da aula</h2></div>
+    <div class="logistics">
+      <div class="log-box">
+        <div class="k" style="font-family:var(--mono);font-size:11px;text-transform:uppercase;opacity:.6;margin-bottom:10px">Preparar a sala</div>
+        <ul class="checklist">
+          <li>Grelha de papel A5 pronta para cada par</li>
+          <li>Lista de posições no mosaico afixada, a preencher na aula</li>
+          <li>Mote do mosaico definido e escrito no quadro</li>
+          <li>Rotação de computadores combinada caso haja mais pares do que lugares</li>
+        </ul>
+      </div>
+      <div class="log-box">
+        <div class="k" style="font-family:var(--mono);font-size:11px;text-transform:uppercase;opacity:.6;margin-bottom:10px">Preparar a impressão</div>
+        <ul class="checklist">
+          <li>Testar previamente os 3 níveis de altura numa peça de amostra</li>
+          <li>Confirmar a cor de filamento única para toda a impressão</li>
+          <li>Etiquetas para nome do ficheiro STL (par + posição)</li>
+          <li>Espaço reservado na parede para a montagem final</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="fnote">No final: um ficheiro STL por par, pronto para imprimir durante a semana. As peças juntam-se numa parede do centro — o mosaico só fica completo depois de todas impressas.</p>
+    <div class="fmeta">3d.monco.io<br>Mosaico Colaborativo<br>2h · a pares · 12–15 anos</div>
+  </div>
+</footer>
+
+</body>
+</html>

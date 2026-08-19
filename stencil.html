@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stencil Funcional — Atividade de Modelação 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F4EC;
+    --ink:#15140F;
+    --rule:#D9D5C4;
+    --lock:#EDEADE;
+    --c1:#C4552D;
+    --c2:#2E6E62;
+    --c3:#D9A441;
+    --mono:'DM Mono',monospace;
+    --disp:'Bricolage Grotesque',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      linear-gradient(var(--rule) 1px,transparent 1px),
+      linear-gradient(90deg,var(--rule) 1px,transparent 1px),
+      var(--paper);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:var(--disp);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px}
+  section{border-bottom:1.5px solid var(--ink)}
+  section.first{border-top:1.5px solid var(--ink)}
+
+  .topbar{background:var(--paper);border-bottom:1.5px solid var(--ink);position:sticky;top:0;z-index:10}
+  .topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+  .topbar span{opacity:.75}
+  .topbar span:first-child{opacity:1;font-weight:500}
+
+  .hero{padding:64px 0 48px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--c1);margin-bottom:18px}
+  h1{font-size:clamp(40px,7vw,64px);font-weight:800;line-height:.98;letter-spacing:-.02em;max-width:12ch}
+  .lede{font-size:18px;line-height:1.55;max-width:54ch;margin-top:22px;color:#3a3830}
+  .meta-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1.5px solid var(--ink);margin-top:36px}
+  .meta-row div{padding:14px 16px;border-right:1.5px solid var(--ink)}
+  .meta-row div:last-child{border-right:none}
+  .meta-row b{display:block;font-size:20px;font-weight:700;margin-bottom:2px}
+  .meta-row span{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
+
+  /* profile signature */
+  .profile{margin-top:44px;border:1.5px solid var(--ink);padding:28px 28px 20px;max-width:560px}
+  .profile-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:18px}
+  .profile-strip{display:flex;align-items:flex-end;gap:0;height:110px;border-bottom:2px solid var(--ink)}
+  .p-seg{flex:1;position:relative;display:flex;align-items:flex-end;justify-content:center}
+  .p-fill{width:70%;border:1.5px solid var(--ink);border-bottom:none}
+  .p0 .p-fill{height:0;border:none}
+  .p1 .p-fill{height:34px;background:var(--c2)}
+  .p2 .p-fill{height:70px;background:var(--c3)}
+  .p3 .p-fill{height:34px;background:var(--c2)}
+  .p4 .p-fill{height:0;border:none}
+  .profile-tags{display:flex;margin-top:14px}
+  .profile-tags span{flex:1;text-align:center;font-family:var(--mono);font-size:10px;text-transform:uppercase;opacity:.6}
+
+  .sec{padding:52px 0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:28px}
+  .sec-num{font-family:var(--mono);font-size:13px;color:var(--c1);font-weight:500}
+  h2{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-.01em}
+  .sec-sub{font-family:var(--mono);font-size:12px;opacity:.6;margin-top:-18px;margin-bottom:28px;padding-left:calc(13px + 14px)}
+
+  .rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--ink)}
+  .rule-card{padding:22px 24px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+  .rule-card:nth-child(2n){border-right:none}
+  .rule-card:nth-last-child(-n+2){border-bottom:none}
+  .rule-card .k{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-bottom:8px}
+  .rule-card .v{font-size:20px;font-weight:700;margin-bottom:6px}
+  .rule-card p{font-size:14px;line-height:1.5;color:#3a3830}
+
+  /* direções */
+  .paths{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--ink);margin-top:24px}
+  .path-card{padding:24px;border-right:1.5px solid var(--ink)}
+  .path-card:last-child{border-right:none}
+  .path-tag{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--paper);background:var(--ink);display:inline-block;padding:2px 8px;margin-bottom:10px}
+  .path-card h3{font-size:19px;font-weight:700;margin-bottom:8px}
+  .path-card p{font-size:14px;line-height:1.5;color:#3a3830}
+
+  .flow{display:flex;flex-direction:column;border:1.5px solid var(--ink)}
+  .step{display:grid;grid-template-columns:64px 1fr;border-bottom:1.5px solid var(--ink)}
+  .step:last-child{border-bottom:none}
+  .step-num{font-family:var(--mono);font-size:13px;padding:20px 0 20px 20px;font-weight:500;color:var(--c1)}
+  .step-body{padding:20px 20px 20px 0;border-left:1.5px solid var(--ink)}
+  .step-body h3{font-size:17px;font-weight:700;margin-bottom:6px}
+  .step-body p{font-size:14px;line-height:1.5;color:#3a3830}
+  .who{display:inline-block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border:1px solid var(--ink);margin-top:8px;margin-right:6px}
+  .swap-mark{background:var(--ink);color:var(--paper)}
+
+  .timeline{border:1.5px solid var(--ink)}
+  .trow{display:grid;grid-template-columns:100px 1fr 90px;border-bottom:1.5px solid var(--ink);align-items:stretch}
+  .trow:last-child{border-bottom:none}
+  .trow .time{font-family:var(--mono);font-size:12px;padding:16px;border-right:1.5px solid var(--ink);display:flex;align-items:center}
+  .trow .desc{padding:16px;border-right:1.5px solid var(--ink)}
+  .trow .desc b{font-size:15px;display:block;margin-bottom:3px}
+  .trow .desc span{font-size:13px;color:#3a3830;line-height:1.45}
+  .trow .dur{font-family:var(--mono);font-size:11px;padding:16px;display:flex;align-items:center;justify-content:flex-end;opacity:.6}
+  .trow.accent{background:var(--lock)}
+
+  .logistics{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .log-box{border:1.5px solid var(--ink);padding:22px}
+  .checklist{list-style:none;margin-top:14px}
+  .checklist li{font-size:14px;line-height:1.6;padding-left:20px;position:relative;color:#3a3830}
+  .checklist li::before{content:'—';position:absolute;left:0;color:var(--c1)}
+
+  footer{padding:48px 0 64px}
+  footer .wrap{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px}
+  footer .fnote{font-size:14px;max-width:44ch;color:#3a3830;line-height:1.5}
+  footer .fmeta{font-family:var(--mono);font-size:11px;text-align:right;opacity:.6;line-height:1.8}
+
+  @media(max-width:680px){
+    .meta-row{grid-template-columns:1fr 1fr}
+    .meta-row div{border-bottom:1.5px solid var(--ink)}
+    .rule-grid{grid-template-columns:1fr}
+    .rule-card{border-right:none}
+    .paths{grid-template-columns:1fr}
+    .path-card{border-right:none;border-bottom:1.5px solid var(--ink)}
+    .path-card:last-child{border-bottom:none}
+    .step{grid-template-columns:44px 1fr}
+    .trow{grid-template-columns:76px 1fr}
+    .trow .dur{display:none}
+    .logistics{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>3d.monco.io</span>
+    <span>Atividade · Stencil Funcional</span>
+    <span>2h · a pares</span>
+  </div>
+</div>
+
+<section class="first hero">
+  <div class="wrap">
+    <div class="eyebrow">Atividade · Molde/template em pares</div>
+    <h1>Stencil Funcional</h1>
+    <p class="lede">Cada par desenha e modela um molde reutilizável — um stencil de 15×15 cm com furos, linhas-guia e moldura, definidos pelas três alturas de extrusão do 3d.monco.io.</p>
+
+    <div class="meta-row">
+      <div><b>2h</b><span>Duração</span></div>
+      <div><b>A pares</b><span>Formato</span></div>
+      <div><b>15×15</b><span>Máx. em cm</span></div>
+      <div><b>3</b><span>Alturas por peça</span></div>
+    </div>
+
+    <div class="profile">
+      <div class="profile-label">Perfil de altura — corte lateral da peça</div>
+      <div class="profile-strip">
+        <div class="p-seg p0"><div class="p-fill"></div></div>
+        <div class="p-seg p1"><div class="p-fill"></div></div>
+        <div class="p-seg p2"><div class="p-fill"></div></div>
+        <div class="p-seg p3"><div class="p-fill"></div></div>
+        <div class="p-seg p4"><div class="p-fill"></div></div>
+      </div>
+      <div class="profile-tags">
+        <span>vazado</span><span>guia</span><span>moldura</span><span>guia</span><span>vazado</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">01</span><h2>O conceito</h2></div>
+    <div class="rule-grid">
+      <div class="rule-card">
+        <div class="k">Vazado · altura 0</div>
+        <div class="v">Furo</div>
+        <p>Atravessa a peça de lado a lado. Serve para decalcar uma forma ou marcar uma caixa de verificação.</p>
+      </div>
+      <div class="rule-card">
+        <div class="k">Altura média</div>
+        <div class="v">Linha-guia</div>
+        <p>Sulco superficial, sem atravessar. Orienta o traço do lápis sem cortar o papel por baixo.</p>
+      </div>
+      <div class="rule-card">
+        <div class="k">Altura máxima</div>
+        <div class="v">Moldura</div>
+        <p>Rebordo saliente. Serve de pega e de referência para alinhar a peça sobre o papel.</p>
+      </div>
+      <div class="rule-card">
+        <div class="k">Tamanho</div>
+        <div class="v">Máx. 15 × 15 cm</div>
+        <p>Cada par trabalha dentro deste limite — pode ser mais pequeno, não precisa de preencher o quadrado todo.</p>
+      </div>
+    </div>
+
+    <div class="paths">
+      <div class="path-card">
+        <div class="path-tag">Direção A</div>
+        <h3>Stencil de checklist</h3>
+        <p>Uma lista de tarefas reutilizável: cada linha tem uma caixa vazada para marcar com lápis, mais um espaço com linha-guia para escrever o nome da tarefa.</p>
+      </div>
+      <div class="path-card">
+        <div class="path-tag">Direção B</div>
+        <h3>Stencil de desenho</h3>
+        <p>Um molde de formas para decalcar: ícones, letras ou motivos geométricos vazados, com linhas-guia para detalhe interior.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Fluxo por par</h2></div>
+    <p class="sec-sub">Um desenha, o outro modela — depois trocam, para que ambos passem pelo computador.</p>
+    <div class="flow">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h3>Escolha + desenho em papel</h3>
+          <p>O par escolhe a direção (checklist ou desenho) e esboça o stencil na grelha, marcando o que é vazado, linha-guia e moldura.</p>
+          <span class="who">Elemento A desenha</span><span class="who">Elemento B acompanha</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h3>Modelação — vazados</h3>
+          <p>No 3d.monco.io, o par constrói a base e define primeiro os furos: as áreas que atravessam a peça.</p>
+          <span class="who">Elemento B modela</span><span class="who">Elemento A guia pelo desenho</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h3>Troca de papéis</h3>
+          <p>Invertem funções: quem desenhou passa a modelar as linhas-guia e a moldura; quem modelou revê medidas e alinhamento.</p>
+          <span class="who swap-mark">Troca ↔</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h3>Modelação — guias e moldura</h3>
+          <p>O novo modelador acrescenta as linhas-guia e fecha a moldura, verificando que nada ficou demasiado fino para imprimir.</p>
+          <span class="who">Elemento A modela</span><span class="who">Elemento B revê</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <h3>Teste funcional + exportação</h3>
+          <p>Testam a peça sobre papel e lápis — a caixa marca-se? A forma decalca-se bem? Ajustam, exportam o STL e preenchem a etiqueta.</p>
+          <span class="who">Ambos testam</span><span class="who">Ambos confirmam</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Cronograma · 2h</h2></div>
+    <div class="timeline">
+      <div class="trow">
+        <div class="time">00:00</div>
+        <div class="desc"><b>Abertura</b><span>Conceito de stencil, as três alturas (vazado/guia/moldura), exemplos das duas direções, demo do 3d.monco.io.</span></div>
+        <div class="dur">10 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">00:10</div>
+        <div class="desc"><b>Escolha + desenho em papel</b><span>Cada par decide a direção e esboça o stencil na grelha, marcando as três alturas.</span></div>
+        <div class="dur">20 min</div>
+      </div>
+      <div class="trow accent">
+        <div class="time">00:30</div>
+        <div class="desc"><b>Modelação · Bloco 1 — vazados</b><span>Os pares entram nos computadores disponíveis. Modelador constrói a base e os furos.</span></div>
+        <div class="dur">35 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:05</div>
+        <div class="desc"><b>Troca de papéis</b><span>Todos os pares invertem funções.</span></div>
+        <div class="dur">5 min</div>
+      </div>
+      <div class="trow accent">
+        <div class="time">01:10</div>
+        <div class="desc"><b>Modelação · Bloco 2 — guias e moldura</b><span>Novo modelador acrescenta linhas-guia e fecha a moldura.</span></div>
+        <div class="dur">30 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:40</div>
+        <div class="desc"><b>Teste funcional</b><span>Testam sobre papel com lápis — a caixa marca, a forma decalca. Ajustam o modelo se precisar.</span></div>
+        <div class="dur">10 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:50</div>
+        <div class="desc"><b>Exportação + etiqueta</b><span>STL exportado, ficheiro nomeado, etiqueta com par + direção escolhida.</span></div>
+        <div class="dur">5 min</div>
+      </div>
+      <div class="trow">
+        <div class="time">01:55</div>
+        <div class="desc"><b>Fecho</b><span>Próximos passos: impressão durante a semana, entrega dos stencils aos pares.</span></div>
+        <div class="dur">5 min</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Antes da aula</h2></div>
+    <div class="logistics">
+      <div class="log-box">
+        <div class="k" style="font-family:var(--mono);font-size:11px;text-transform:uppercase;opacity:.6;margin-bottom:10px">Preparar a sala</div>
+        <ul class="checklist">
+          <li>Grelha de papel A5 (15×15) pronta para cada par</li>
+          <li>Exemplos impressos de checklist e de desenho, para inspirar</li>
+          <li>Folhas soltas e lápis para o teste funcional</li>
+          <li>Rotação de computadores combinada caso haja mais pares do que lugares</li>
+        </ul>
+      </div>
+      <div class="log-box">
+        <div class="k" style="font-family:var(--mono);font-size:11px;text-transform:uppercase;opacity:.6;margin-bottom:10px">Preparar a impressão</div>
+        <ul class="checklist">
+          <li>Confirmar que os vazados atravessam mesmo a peça, sem base residual</li>
+          <li>Testar a espessura mínima da moldura para não partir</li>
+          <li>Etiquetas para nome do ficheiro STL (par + direção)</li>
+          <li>Cor de filamento única confirmada para toda a impressão</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="fnote">No final: um stencil funcional por par, pronto para imprimir durante a semana — para usar como checklist reutilizável ou molde de desenho.</p>
+    <div class="fmeta">3d.monco.io<br>Stencil Funcional<br>2h · a pares · 12–15 anos</div>
+  </div>
+</footer>
+
+</body>
+</html>
